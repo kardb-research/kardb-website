@@ -100,6 +100,53 @@ export default function AboutPage() {
         </p>
 
       </section>
+       
+      {/* SEBI Registration Disclosure */}
+      <section className="border-b border-white/10 bg-slate-900/50">
+        <div className="mx-auto max-w-7xl px-6 py-8">
+          <div className="rounded-2xl border border-cyan-900/70 bg-slate-950/80 p-6 md:p-8">
+            <div className="flex items-start gap-4">
+              <div className="mt-1 shrink-0 text-cyan-400">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4" />
+                  <path d="M12 8h.01" />
+                </svg>
+              </div>
+
+              <div>
+                <h2 className="text-lg font-bold text-cyan-400">
+                  SEBI Registration Disclosure
+                </h2>
+
+                <p className="mt-3 max-w-5xl text-sm leading-7 text-slate-300 md:text-base">
+                  KARDB is currently developing its financial research platform. SEBI Research Analyst registration details will be updated if and when registration is granted.
+
+                  NO SEBI registration is  being claimed on this page. Visitors should not interpret this website ias confirmation that KARDB is SEBI- registered Research Analyst.
+                </p>
+
+                <Link
+                  href="/regulatory/sebi-registration"
+                  className="mt-4 inline-flex text-sm font-semibold text-cyan-400 underline underline-offset-4 hover:text-cyan-300"
+                >
+                  View Regulatory Disclosure
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Founder Section */}
       <section className="border-y border-white/10 bg-slate-900/50">
