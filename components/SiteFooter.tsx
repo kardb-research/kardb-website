@@ -2,21 +2,7 @@
 import Link from "next/link";
 
 export default function SiteFooter() {
-  const socialLinks = [
-    {
-      name: "Instagram",
-      url: "https://www.instagram.com/kardb.research/",
-    },
-    {
-      name: "LinkedIn",
-      url: "https://www.linkedin.com/in/deepak-bhandari-75545b447/",
-    },
-    {
-      name: "YouTube",
-      url: "https://www.youtube.com/@kardb.research",
-    },
-  ];
-
+  
   return (
     <footer className="mt-20 border-t border-slate-800 bg-slate-950">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-5">

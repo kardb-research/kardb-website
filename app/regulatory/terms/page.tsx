@@ -18,7 +18,7 @@ export default function Page() {
         <p>Research is based on information and analytical methods considered relevant at the time of preparation. Market conditions and company circumstances can change. Research does not eliminate investment risk or assure a particular outcome.</p>
       </InfoBlock>
       <InfoBlock title="Access and intellectual property">
-        <p>Paid reports and subscription content are intended for the subscribed user's permitted use. Copying, redistribution, resale or unauthorised publication may be restricted by the final service terms.</p>
+        <p>Paid reports and subscription content are intended for the subscribed user&apos;s permitted use. Copying, redistribution, resale or unauthorised publication may be restricted by the final service terms.</p>
       </InfoBlock>
       <InfoBlock title="Fees, cancellation and refunds">
         <p>The final terms will specify applicable fees, taxes, payment method, renewal, cancellation and any refund rules.</p>
