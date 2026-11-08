@@ -25,48 +25,27 @@ export default async function SiteHeader() {
   let userName = "";
 
   if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role, full_name")
-      .eq("id", user.id)
-      .maybeSingle();
+    const { data, error } = await supabase.rpc("get_header_access");
 
-    isAdmin = profile?.role === "admin";
-    userName = profile?.full_name || "";
+    if (!error && data?.length) {
+      const access = data[0];
 
-    if (!isAdmin) {
-      const now = new Date().toISOString();
-
-      const { data: subscription } = await supabase
-        .from("subscriptions")
-        .select("plan_id")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .lte("starts_at", now)
-        .gt("expires_at", now)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (subscription) {
-        const { data: plan } = await supabase
-          .from("plans")
-          .select("id")
-          .eq("id", subscription.plan_id)
-          .eq("is_active", true)
-          .maybeSingle();
-
-        hasActiveSubscription = !!plan;
-      }
+      isAdmin = access.role === "admin";
+      hasActiveSubscription = access.has_active_subscription === true;
+      userName = access.full_name || "";
     }
   }
 
-  const canAccessDashboard = !!user && (isAdmin || hasActiveSubscription);
+  const canAccessDashboard =
+    !!user && (isAdmin || hasActiveSubscription);
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-6 py-4">
-        <Link href="/" className="shrink-0 text-xl font-black tracking-tight text-white">
+        <Link
+          href="/"
+          className="shrink-0 text-xl font-black tracking-tight text-white"
+        >
           KARDB<span className="text-cyan-400">.</span>
         </Link>
 
@@ -86,7 +65,10 @@ export default async function SiteHeader() {
           {canAccessDashboard ? (
             <>
               {isAdmin && (
-                <Link href="/admin" className="text-sm font-semibold text-cyan-400">
+                <Link
+                  href="/admin"
+                  className="text-sm font-semibold text-cyan-400"
+                >
                   Admin
                 </Link>
               )}
@@ -154,12 +136,18 @@ export default async function SiteHeader() {
 
           {canAccessDashboard && (
             <>
-              <Link href="/account/dashboard" className="text-sm text-cyan-400">
+              <Link
+                href="/account/dashboard"
+                className="text-sm text-cyan-400"
+              >
                 Dashboard
               </Link>
 
               {isAdmin && (
-                <Link href="/admin" className="text-sm font-semibold text-cyan-400">
+                <Link
+                  href="/admin"
+                  className="text-sm font-semibold text-cyan-400"
+                >
                   Admin
                 </Link>
               )}
@@ -167,13 +155,19 @@ export default async function SiteHeader() {
           )}
 
           {user && !canAccessDashboard && (
-            <Link href="/account/subscription" className="text-sm text-cyan-400">
+            <Link
+              href="/account/subscription"
+              className="text-sm text-cyan-400"
+            >
               Renew Subscription
             </Link>
           )}
 
           {!user && (
-            <Link href="/account/login" className="text-sm text-cyan-400">
+            <Link
+              href="/account/login"
+              className="text-sm text-cyan-400"
+            >
               Login
             </Link>
           )}
