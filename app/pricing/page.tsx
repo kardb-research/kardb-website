@@ -1,5 +1,15 @@
 
+import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
+
+export const metadata: Metadata = {
+  title: "Pricing & Plans",
+  description:
+    "Explore planned KARDB research access options. KARDB is under development, and paid research services are not currently available pending applicable regulatory requirements.",
+  alternates: {
+    canonical: "https://kardb.com/pricing",
+  },
+};
 
 const plans = [
   {

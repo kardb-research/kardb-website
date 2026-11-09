@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
+
+export const metadata: Metadata = {
+  title: "About KARDB",
+  description:
+    "Learn about KARDB, a developing equity research platform focused on structured financial analysis, company fundamentals, transparent methodology and clear research communication.",
+  alternates: {
+    canonical: "https://kardb.com/about",
+  },
+};
 
 export default function AboutPage() {
   return (

@@ -1,5 +1,15 @@
 
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "Conflict of Interest Policy",
+  description:
+    "Read KARDB's conflict of interest policy covering financial interests, beneficial ownership, material conflicts, research-report disclosures and compliance procedures.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/conflict",
+  },
+};
 
 export default function Page() {
   return (

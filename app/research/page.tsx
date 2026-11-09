@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteFooter from "../../components/SiteFooter";
+
+export const metadata: Metadata = {
+  title: "Equity Research Framework",
+  description:
+    "Explore KARDB's structured equity research framework covering fundamental research, ratio analysis, peer comparison, industry analysis and technical analysis.",
+  alternates: {
+    canonical: "https://kardb.com/research",
+  },
+};
 
 const researchModules = [
   {

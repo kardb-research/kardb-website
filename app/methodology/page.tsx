@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
+
+export const metadata: Metadata = {
+  title: "Research Methodology",
+  description:
+    "Understand KARDB's structured equity research methodology, from financial data collection and company analysis to peer comparison, interpretation and research output.",
+  alternates: {
+    canonical: "https://kardb.com/methodology",
+  },
+};
 
 const steps = [
   ["01", "Data", "Collect relevant company, financial, peer, industry and market data."],

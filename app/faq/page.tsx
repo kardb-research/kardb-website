@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
+
+export const metadata: Metadata = {
+  title: "Frequently Asked Questions",
+  description:
+    "Find answers to common questions about KARDB, equity research, research reports, subscriptions, investment risks, AI usage and regulatory information.",
+  alternates: {
+    canonical: "https://kardb.com/faq",
+  },
+};
 
 const faqs = [
   ["What is KARDB?", "KARDB is being developed as a structured research platform focused on business analysis, financial analysis, ratios, peer comparison, industry context and market behaviour."],

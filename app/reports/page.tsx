@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
+
+export const metadata: Metadata = {
+  title: "Research Reports",
+  description:
+    "Explore KARDB's equity research reports, company analysis, sector research and technical analysis. Published reports will be listed with their research date and access level.",
+  alternates: {
+    canonical: "https://kardb.com/reports",
+  },
+};
 
 const reports = [
   ["Sample Research Report", "Company Research", "Coming soon"],

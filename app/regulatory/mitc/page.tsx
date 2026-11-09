@@ -1,5 +1,15 @@
 
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "Most Important Terms & Conditions (MITC)",
+  description:
+    "Review KARDB's Most Important Terms and Conditions covering research services, applicable fees, advance payments, refunds, payment methods and investment risk disclosures.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/mitc",
+  },
+};
 
 export default function Page() {
   return (

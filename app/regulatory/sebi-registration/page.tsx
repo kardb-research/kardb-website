@@ -1,5 +1,14 @@
-
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "SEBI Registration Status",
+  description:
+    "View KARDB's SEBI Research Analyst registration status and related disclosures. Registration details will be published only after official confirmation.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/sebi-registration",
+  },
+};
 
 export default function Page() {
   return (

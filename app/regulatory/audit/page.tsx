@@ -1,5 +1,15 @@
 
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "Compliance Audit Disclosure",
+  description:
+    "View KARDB's compliance audit disclosure, including current operational status and the framework for future audit reporting under applicable SEBI requirements.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/audit",
+  },
+};
 
 export default function Page() {
   return (

@@ -1,5 +1,15 @@
 
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "Investor Complaints",
+  description:
+    "View KARDB's investor complaint disclosure framework, including complaint statistics, received, resolved and pending complaints, and applicable update frequency.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/complaints",
+  },
+};
 
 export default function Page() {
   return (

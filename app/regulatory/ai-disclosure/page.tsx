@@ -1,5 +1,14 @@
-
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "AI Usage Disclosure",
+  description:
+    "Understand how KARDB may use AI-assisted tools in research workflows, including data organisation, document processing, screening, drafting assistance and human oversight.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/ai-disclosure",
+  },
+};
 
 export default function Page() {
   return (

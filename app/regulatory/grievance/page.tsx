@@ -1,5 +1,15 @@
 
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "Grievance Redressal",
+  description:
+    "Learn about KARDB's grievance redressal process, investor complaint escalation, SEBI SCORES 2.0 and applicable online dispute resolution mechanisms.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/grievance",
+  },
+};
 
 export default function Page() {
   return (

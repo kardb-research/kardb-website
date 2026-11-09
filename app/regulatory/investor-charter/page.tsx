@@ -1,5 +1,15 @@
 
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "Investor Charter",
+  description:
+    "Read KARDB's investor charter covering research services, investor protection, investor rights, responsibilities, transparency and grievance mechanisms.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/investor-charter",
+  },
+};
 
 export default function Page() {
   return (

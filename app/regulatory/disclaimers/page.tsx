@@ -1,5 +1,15 @@
 
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "Investment Risk Disclaimers",
+  description:
+    "Read KARDB's investment risk disclaimers covering securities market risks, research limitations, past performance, information sources and investor responsibilities.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/disclaimers",
+  },
+};
 
 export default function Page() {
   return (

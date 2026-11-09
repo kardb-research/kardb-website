@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
+
+export const metadata: Metadata = {
+  title: "Regulatory Disclosures",
+  description:
+    "Access KARDB's regulatory disclosures, investor charter, grievance redressal information, fee structure, conflict of interest policy, AI disclosure and disclaimers.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory",
+  },
+};
 
 const items = [
   ["SEBI Registration", "/regulatory/sebi-registration"],

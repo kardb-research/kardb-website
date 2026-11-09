@@ -1,5 +1,15 @@
 
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "Research Fee Structure",
+  description:
+    "Explore KARDB's planned research pricing, regulatory fee framework, applicable charges, payment methods and refund disclosures.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/fees",
+  },
+};
 
 export default function Page() {
   return (

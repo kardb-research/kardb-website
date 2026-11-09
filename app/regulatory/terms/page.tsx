@@ -1,5 +1,15 @@
 
+import type { Metadata } from "next";
 import ContentPage, { InfoBlock } from "@/components/ContentPage";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions",
+  description:
+    "Read KARDB's terms and conditions covering research services, service scope, investment risks, intellectual property, access, fees, cancellation and refunds.",
+  alternates: {
+    canonical: "https://kardb.com/regulatory/terms",
+  },
+};
 
 export default function Page() {
   return (
