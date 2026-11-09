@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/disclaimers",
   },
+  openGraph: {
+    title: "Investment Risk Disclaimers | KARDB",
+    description:
+      "Read KARDB's investment risk disclaimers covering securities market risks, research limitations, past performance, information sources and investor responsibilities.",
+    url: "https://kardb.com/regulatory/disclaimers",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Investment Risk Disclaimers | KARDB",
+    description:
+      "Read KARDB's investment risk disclaimers covering securities market risks, research limitations, past performance, information sources and investor responsibilities.",
+  },
 };
 
 export default function Page() {

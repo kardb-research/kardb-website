@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/pricing",
   },
+  openGraph: {
+    title: "Pricing & Plans | KARDB",
+    description:
+      "Explore planned KARDB research access options. KARDB is under development, and paid research services are not currently available pending applicable regulatory requirements.",
+    url: "https://kardb.com/pricing",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Pricing & Plans | KARDB",
+    description:
+      "Explore planned KARDB research access options. KARDB is under development, and paid research services are not currently available pending applicable regulatory requirements.",
+  },
 };
 
 const plans = [

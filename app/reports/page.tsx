@@ -8,8 +8,21 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/reports",
   },
+  openGraph: {
+    title: "Research Reports | KARDB",
+    description:
+      "Explore KARDB's equity research reports, company analysis, sector research and technical analysis. Published reports will be listed with their research date and access level.",
+    url: "https://kardb.com/reports",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Research Reports | KARDB",
+    description:
+      "Explore KARDB's equity research reports, company analysis, sector research and technical analysis. Published reports will be listed with their research date and access level.",
+  },
 };
-
 const reports = [
   ["Sample Research Report", "Company Research", "Coming soon"],
   ["Sample Sector Report", "Industry Research", "Coming soon"],

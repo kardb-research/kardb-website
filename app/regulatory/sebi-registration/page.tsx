@@ -8,6 +8,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/sebi-registration",
   },
+  openGraph: {
+    title: "SEBI Registration Status | KARDB",
+    description:
+      "View KARDB's SEBI Research Analyst registration status and related disclosures. Registration details will be published only after official confirmation.",
+    url: "https://kardb.com/regulatory/sebi-registration",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "SEBI Registration Status | KARDB",
+    description:
+      "View KARDB's SEBI Research Analyst registration status and related disclosures. Registration details will be published only after official confirmation.",
+  },
 };
 
 export default function Page() {

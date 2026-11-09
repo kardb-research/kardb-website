@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/investor-charter",
   },
+  openGraph: {
+    title: "Investor Charter | KARDB",
+    description:
+      "Read KARDB's investor charter covering research services, investor protection, investor rights, responsibilities, transparency and grievance mechanisms.",
+    url: "https://kardb.com/regulatory/investor-charter",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Investor Charter | KARDB",
+    description:
+      "Read KARDB's investor charter covering research services, investor protection, investor rights, responsibilities, transparency and grievance mechanisms.",
+  },
 };
 
 export default function Page() {

@@ -8,6 +8,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/ai-disclosure",
   },
+  openGraph: {
+    title: "AI Usage Disclosure | KARDB",
+    description:
+      "Understand how KARDB may use AI-assisted tools in research workflows, including data organisation, document processing, screening, drafting assistance and human oversight.",
+    url: "https://kardb.com/regulatory/ai-disclosure",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "AI Usage Disclosure | KARDB",
+    description:
+      "Understand how KARDB may use AI-assisted tools in research workflows, including data organisation, document processing, screening, drafting assistance and human oversight.",
+  },
 };
 
 export default function Page() {

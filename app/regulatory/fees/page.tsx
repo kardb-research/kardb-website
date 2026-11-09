@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/fees",
   },
+  openGraph: {
+    title: "Research Fee Structure | KARDB",
+    description:
+      "Explore KARDB's planned research pricing, regulatory fee framework, applicable charges, payment methods and refund disclosures.",
+    url: "https://kardb.com/regulatory/fees",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Research Fee Structure | KARDB",
+    description:
+      "Explore KARDB's planned research pricing, regulatory fee framework, applicable charges, payment methods and refund disclosures.",
+  },
 };
 
 export default function Page() {

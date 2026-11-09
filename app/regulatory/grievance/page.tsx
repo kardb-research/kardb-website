@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/grievance",
   },
+  openGraph: {
+    title: "Grievance Redressal | KARDB",
+    description:
+      "Learn about KARDB's grievance redressal process, investor complaint escalation, SEBI SCORES 2.0 and applicable online dispute resolution mechanisms.",
+    url: "https://kardb.com/regulatory/grievance",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Grievance Redressal | KARDB",
+    description:
+      "Learn about KARDB's grievance redressal process, investor complaint escalation, SEBI SCORES 2.0 and applicable online dispute resolution mechanisms.",
+  },
 };
 
 export default function Page() {

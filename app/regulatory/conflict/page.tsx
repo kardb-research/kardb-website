@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/conflict",
   },
+  openGraph: {
+    title: "Conflict of Interest Policy | KARDB",
+    description:
+      "Read KARDB's conflict of interest policy covering financial interests, beneficial ownership, material conflicts, research-report disclosures and compliance procedures.",
+    url: "https://kardb.com/regulatory/conflict",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Conflict of Interest Policy | KARDB",
+    description:
+      "Read KARDB's conflict of interest policy covering financial interests, beneficial ownership, material conflicts, research-report disclosures and compliance procedures.",
+  },
 };
 
 export default function Page() {

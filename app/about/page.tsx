@@ -8,6 +8,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/about",
   },
+  openGraph: {
+    title: "About KARDB | KARDB",
+    description:
+      "Learn about KARDB, a developing equity research platform focused on structured financial analysis, company fundamentals, transparent methodology and clear research communication.",
+    url: "https://kardb.com/about",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "About KARDB | KARDB",
+    description:
+      "Learn about KARDB, a developing equity research platform focused on structured financial analysis, company fundamentals, transparent methodology and clear research communication.",
+  },
 };
 
 export default function AboutPage() {

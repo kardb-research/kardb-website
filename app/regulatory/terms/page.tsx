@@ -9,8 +9,21 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/terms",
   },
+  openGraph: {
+    title: "Terms & Conditions | KARDB",
+    description:
+      "Read KARDB's terms and conditions covering research services, service scope, investment risks, intellectual property, access, fees, cancellation and refunds.",
+    url: "https://kardb.com/regulatory/terms",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms & Conditions | KARDB",
+    description:
+      "Read KARDB's terms and conditions covering research services, service scope, investment risks, intellectual property, access, fees, cancellation and refunds.",
+  },
 };
-
 export default function Page() {
   return (
     <ContentPage

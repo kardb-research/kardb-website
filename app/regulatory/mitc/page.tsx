@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/mitc",
   },
+  openGraph: {
+    title: "Most Important Terms & Conditions (MITC) | KARDB",
+    description:
+      "Review KARDB's Most Important Terms and Conditions covering research services, applicable fees, advance payments, refunds, payment methods and investment risk disclosures.",
+    url: "https://kardb.com/regulatory/mitc",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Most Important Terms & Conditions (MITC) | KARDB",
+    description:
+      "Review KARDB's Most Important Terms and Conditions covering research services, applicable fees, advance payments, refunds, payment methods and investment risk disclosures.",
+  },
 };
 
 export default function Page() {

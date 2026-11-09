@@ -8,6 +8,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/faq",
   },
+  openGraph: {
+    title: "Frequently Asked Questions | KARDB",
+    description:
+      "Find answers to common questions about KARDB, equity research, research reports, subscriptions, investment risks, AI usage and regulatory information.",
+    url: "https://kardb.com/faq",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Frequently Asked Questions | KARDB",
+    description:
+      "Find answers to common questions about KARDB, equity research, research reports, subscriptions, investment risks, AI usage and regulatory information.",
+  },
 };
 
 const faqs = [

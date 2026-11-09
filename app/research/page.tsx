@@ -9,8 +9,21 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/research",
   },
+  openGraph: {
+    title: "Equity Research Framework | KARDB",
+    description:
+      "Explore KARDB's structured equity research framework covering fundamental research, ratio analysis, peer comparison, industry analysis and technical analysis.",
+    url: "https://kardb.com/research",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Equity Research Framework | KARDB",
+    description:
+      "Explore KARDB's structured equity research framework covering fundamental research, ratio analysis, peer comparison, industry analysis and technical analysis.",
+  },
 };
-
 const researchModules = [
   {
     number: "01",

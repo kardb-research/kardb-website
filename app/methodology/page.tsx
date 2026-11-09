@@ -8,6 +8,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/methodology",
   },
+  openGraph: {
+    title: "Research Methodology | KARDB",
+    description:
+      "Understand KARDB's structured equity research methodology, from financial data collection and company analysis to peer comparison, interpretation and research output.",
+    url: "https://kardb.com/methodology",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Research Methodology | KARDB",
+    description:
+      "Understand KARDB's structured equity research methodology, from financial data collection and company analysis to peer comparison, interpretation and research output.",
+  },
 };
 
 const steps = [

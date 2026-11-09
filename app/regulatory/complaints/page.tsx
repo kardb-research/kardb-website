@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/complaints",
   },
+  openGraph: {
+    title: "Investor Complaints | KARDB",
+    description:
+      "View KARDB's investor complaint disclosure framework, including complaint statistics, received, resolved and pending complaints, and applicable update frequency.",
+    url: "https://kardb.com/regulatory/complaints",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Investor Complaints | KARDB",
+    description:
+      "View KARDB's investor complaint disclosure framework, including complaint statistics, received, resolved and pending complaints, and applicable update frequency.",
+  },
 };
 
 export default function Page() {

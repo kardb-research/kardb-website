@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory",
   },
+  openGraph: {
+    title: "Regulatory Disclosures | KARDB",
+    description:
+      "Access KARDB's regulatory disclosures, investor charter, grievance redressal information, fee structure, conflict of interest policy, AI disclosure and disclaimers.",
+    url: "https://kardb.com/regulatory",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Regulatory Disclosures | KARDB",
+    description:
+      "Access KARDB's regulatory disclosures, investor charter, grievance redressal information, fee structure, conflict of interest policy, AI disclosure and disclaimers.",
+  },
 };
 
 const items = [

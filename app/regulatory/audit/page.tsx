@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kardb.com/regulatory/audit",
   },
+  openGraph: {
+    title: "Compliance Audit Disclosure | KARDB",
+    description:
+      "View KARDB's compliance audit disclosure, including current operational status and the framework for future audit reporting under applicable SEBI requirements.",
+    url: "https://kardb.com/regulatory/audit",
+    siteName: "KARDB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Compliance Audit Disclosure | KARDB",
+    description:
+      "View KARDB's compliance audit disclosure, including current operational status and the framework for future audit reporting under applicable SEBI requirements.",
+  },
 };
 
 export default function Page() {
