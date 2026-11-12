@@ -50,34 +50,45 @@ export default async function SubscriberMarketBriefPage() {
       .eq("is_active", true)
       .maybeSingle();
 
-    if (!plan) redirect("/account/login?reason=subscription-expired");
+       if (!plan) redirect("/account/login?reason=subscription-expired");
   }
 
-  const { data: indexRows } = await supabase
+  const [
+  { data: indexRows },
+  { data: vixData },
+  { data: breadth },
+] = await Promise.all([
+  supabase
     .from("market_eod_indices")
     .select("trade_date, index_symbol, open, high, low, close, previous_close")
     .in("index_symbol", ["NIFTY", "SENSEX", "BANKNIFTY"])
-    .order("trade_date", { ascending: false });
+    .order("trade_date", { ascending: false }),
 
-  const latestIndexData: Record<string, NonNullable<typeof indexRows>[number]> = {};
-
-  for (const row of indexRows ?? []) {
-    if (!latestIndexData[row.index_symbol]) {
-      latestIndexData[row.index_symbol] = row;
-    }
-  }
-  const { data: vixData } = await supabase
+  supabase
     .from("market_eod_vix")
     .select("trade_date, open, high, low, close, previous_close")
     .order("trade_date", { ascending: false })
     .limit(1)
-    .maybeSingle();
+    .maybeSingle(),
 
-  const { data: breadth } = await supabase
+  supabase
     .from("market_eod_stocks")
     .select("close, previous_close")
     .order("trade_date", { ascending: false })
-    .limit(500);
+    .limit(500),
+]);
+
+const latestIndexData: Record<
+  string,
+  NonNullable<typeof indexRows>[number]
+> = {};
+
+for (const row of indexRows ?? []) {
+  if (!latestIndexData[row.index_symbol]) {
+    latestIndexData[row.index_symbol] = row;
+  }
+}
+
 
   const advances = (breadth ?? []).filter(
     (row) => Number(row.close) > Number(row.previous_close)
