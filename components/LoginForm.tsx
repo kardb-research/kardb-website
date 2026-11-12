@@ -24,26 +24,25 @@ export default function LoginForm() {
   const [savedEmails, setSavedEmails] = useState<string[]>([]);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [loading, setLoading] = useState(false);
 
   function loadLocalEmails() {
-  if (window.location.hostname !== "localhost") return;
+    if (window.location.hostname !== "localhost") return;
 
-  try {
-    const stored = localStorage.getItem(EMAIL_STORAGE_KEY);
-    const parsed: string[] = stored ? JSON.parse(stored) : [];
+    try {
+      const stored = localStorage.getItem(EMAIL_STORAGE_KEY);
+      const parsed: string[] = stored ? JSON.parse(stored) : [];
 
-    const emails = Array.from(
-      new Set([...DEFAULT_EMAILS, ...parsed])
-    );
+      const emails = Array.from(
+        new Set([...DEFAULT_EMAILS, ...parsed])
+      );
 
-    setSavedEmails(emails);
-    localStorage.setItem(EMAIL_STORAGE_KEY, JSON.stringify(emails));
-  } catch {
-    setSavedEmails(DEFAULT_EMAILS);
+      setSavedEmails(emails);
+      localStorage.setItem(EMAIL_STORAGE_KEY, JSON.stringify(emails));
+    } catch {
+      setSavedEmails(DEFAULT_EMAILS);
+    }
   }
-}
 
   function saveLocalEmail(value: string) {
     if (window.location.hostname !== "localhost") return;
@@ -51,6 +50,7 @@ export default function LoginForm() {
     try {
       const stored = localStorage.getItem(EMAIL_STORAGE_KEY);
       const parsed: string[] = stored ? JSON.parse(stored) : [];
+
       const emails = Array.from(
         new Set([...DEFAULT_EMAILS, ...parsed, value.trim().toLowerCase()])
       );
@@ -58,18 +58,13 @@ export default function LoginForm() {
       localStorage.setItem(EMAIL_STORAGE_KEY, JSON.stringify(emails));
       setSavedEmails(emails);
     } catch {
-      // Login should continue even if local browser storage is unavailable.
+      // Login should continue if local storage is unavailable.
     }
   }
-
-  const showExpiredMessage =
-    subscriptionExpired ||
-    searchParams.get("reason") === "subscription-expired";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setSubscriptionExpired(false);
     setLoading(true);
 
     try {
@@ -77,7 +72,7 @@ export default function LoginForm() {
 
       const { data: authData, error: authError } =
         await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim(),
           password,
         });
 
@@ -88,72 +83,42 @@ export default function LoginForm() {
 
       saveLocalEmail(email);
 
-      // First check whether the user is an admin.
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", authData.user.id)
-        .maybeSingle();
+      const { data, error: accessError } = await supabase.rpc(
+        "get_trial_access"
+      );
 
-      if (profileError || !profile) {
-        setError("Unable to verify your account. Please try again.");
+      if (accessError || !data || data.length === 0) {
+        setError(
+          "We could not verify your account access. Please try again later."
+        );
         return;
       }
 
-      // Admin users do not need a paid subscription.
-      if (profile.role === "admin") {
-        router.push("/admin");
+      const access = data[0];
+
+      // Administrator access.
+      if (access.is_admin === true) {
+        router.replace("/admin");
         router.refresh();
         return;
       }
 
-      // Subscription verification for subscribers.
-      const now = new Date().toISOString();
-
-      const { data: subscription, error: subscriptionError } =
-        await supabase
-          .from("subscriptions")
-          .select("plan_id")
-          .eq("user_id", authData.user.id)
-          .eq("status", "active")
-          .lte("starts_at", now)
-          .gt("expires_at", now)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-      if (subscriptionError) {
-        setError(
-          "We could not verify your subscription. Please try again later."
-        );
+      // Active paid subscribers.
+      if (access.has_active_subscription === true) {
+        router.replace("/account/dashboard");
+        router.refresh();
         return;
       }
 
-      if (!subscription) {
-        setSubscriptionExpired(true);
+      // Users with an active 7-day trial.
+      if (access.is_trial_active === true) {
+        router.replace("/account/dashboard");
+        router.refresh();
         return;
       }
 
-      const { data: plan, error: planError } = await supabase
-        .from("plans")
-        .select("id")
-        .eq("id", subscription.plan_id)
-        .eq("is_active", true)
-        .maybeSingle();
-
-      if (planError) {
-        setError(
-          "We could not verify your subscription. Please try again later."
-        );
-        return;
-      }
-
-      if (!plan) {
-        setSubscriptionExpired(true);
-        return;
-      }
-
-      router.push("/account/dashboard");
+      // Expired trial or account without trial access.
+      router.replace("/account/subscription");
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -161,6 +126,9 @@ export default function LoginForm() {
       setLoading(false);
     }
   }
+
+  const showExpiredMessage =
+    searchParams.get("reason") === "subscription-expired";
 
   return (
     <section className="mx-auto max-w-md px-6 py-20">
@@ -174,51 +142,44 @@ export default function LoginForm() {
         {showExpiredMessage && (
           <div className="mt-6 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
             <h2 className="font-bold text-amber-300">
-              Subscription Expired
+              Subscription or Trial Access Required
             </h2>
 
             <p className="mt-2 text-sm text-slate-300">
-              Your KARDB subscription has expired or is not active.
-              Please purchase or renew a subscription to access the
-              KARDB Research Platform and its reports.
+              Please sign in to check your KARDB access status and available
+              subscription options.
             </p>
-
-            <Link
-              href="/account/subscription"
-              className="mt-4 inline-block rounded-lg bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950"
-            >
-              Buy / Renew Subscription
-            </Link>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <label className="block text-sm text-slate-300">
-  Email
-  <input
-    required
-    type="email"
-    list="kardb-saved-emails"
-    autoComplete="email"
-    onFocus={loadLocalEmails}
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-cyan-400"
-    placeholder="you@example.com"
-  />
+            Email
+            <input
+              required
+              type="email"
+              list="kardb-saved-emails"
+              autoComplete="email"
+              onFocus={loadLocalEmails}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-cyan-400"
+              placeholder="you@example.com"
+            />
 
-  <datalist id="kardb-saved-emails">
-    {savedEmails.map((savedEmail) => (
-      <option key={savedEmail} value={savedEmail} />
-    ))}
-  </datalist>
-</label>
+            <datalist id="kardb-saved-emails">
+              {savedEmails.map((savedEmail) => (
+                <option key={savedEmail} value={savedEmail} />
+              ))}
+            </datalist>
+          </label>
 
           <label className="block text-sm text-slate-300">
             Password
             <input
               required
               type="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-cyan-400"

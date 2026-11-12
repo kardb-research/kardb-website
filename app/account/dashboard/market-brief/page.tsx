@@ -18,39 +18,32 @@ export default async function SubscriberMarketBriefPage() {
 
   if (!user) redirect("/account/login");
 
-  const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
 
-  const isAdmin = profile?.role === "admin";
-  const now = new Date().toISOString();
+  if (profileError || !profile) {
+    redirect("/account/login?reason=verification");
+  }
 
-  if (!isAdmin) {
-    const { data: subscription, error } = await supabase
-      .from("subscriptions")
-      .select("plan_id")
-      .eq("user_id", user.id)
-      .eq("status", "active")
-      .lte("starts_at", now)
-      .gt("expires_at", now)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+  const { data: accessData, error: accessError } =
+    await supabase.rpc("get_trial_access");
 
-    if (error || !subscription) {
-      redirect("/account/login?reason=subscription-expired");
-    }
+  if (accessError || !accessData?.length) {
+    redirect("/account/login?reason=verification");
+  }
 
-    const { data: plan } = await supabase
-      .from("plans")
-      .select("id")
-      .eq("id", subscription.plan_id)
-      .eq("is_active", true)
-      .maybeSingle();
+  const access = accessData[0];
 
-       if (!plan) redirect("/account/login?reason=subscription-expired");
+  const canAccessMarketBrief =
+    access.is_admin === true ||
+    access.has_active_subscription === true ||
+    access.is_trial_active === true;
+
+  if (!canAccessMarketBrief) {
+    redirect("/account/subscription");
   }
 
   const [

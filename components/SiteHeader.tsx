@@ -22,6 +22,7 @@ export default async function SiteHeader() {
 
   let isAdmin = false;
   let hasActiveSubscription = false;
+  let isTrialActive = false;
   let userName = "";
 
   if (user) {
@@ -34,10 +35,17 @@ export default async function SiteHeader() {
       hasActiveSubscription = access.has_active_subscription === true;
       userName = access.full_name || "";
     }
+
+    const { data: trialData, error: trialError } =
+      await supabase.rpc("get_trial_access");
+
+    if (!trialError && trialData?.length) {
+      isTrialActive = trialData[0].is_trial_active === true;
+    }
   }
 
   const canAccessDashboard =
-    !!user && (isAdmin || hasActiveSubscription);
+    !!user && (isAdmin || hasActiveSubscription || isTrialActive);
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur">
