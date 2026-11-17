@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import { requireAdmin } from "@/lib/supabase/admin";
@@ -25,7 +26,7 @@ export default async function AdminDashboardPage() {
             Role: {profile.role}
           </p>
 
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2">
             <AdminCard
               title="Research Reports"
               description="Upload, manage and publish company research reports."
@@ -42,6 +43,12 @@ export default async function AdminDashboardPage() {
               title="Market Brief"
               description="Manage daily and weekly market brief content."
               href="/admin/market-brief"
+            />
+
+            <AdminCard
+              title="Economic Intelligence"
+              description="Manage economic indicators, data imports and economic updates."
+              href="/admin/economic-intelligence"
             />
           </div>
         </div>

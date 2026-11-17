@@ -9,6 +9,78 @@ const indices = [
   { name: "BANK NIFTY", symbol: "BANKNIFTY" },
 ];
 
+function formatNumber(value: number, decimals = 2) {
+  return value.toLocaleString("en-IN", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+
+function changeColor(change: number) {
+  return change > 0
+    ? "text-emerald-400"
+    : change < 0
+      ? "text-red-400"
+      : "text-slate-400";
+}
+
+function MarketCard({
+  name,
+  close,
+  previous,
+  tradeDate,
+  decimals = 2,
+  unit = "",
+  compact = false,
+}: {
+  name: string;
+  close: number | null;
+  previous: number | null;
+  tradeDate: string | null;
+  decimals?: number;
+  unit?: string;
+  compact?: boolean;
+}) {
+  if (close === null || previous === null) {
+    return (
+      <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
+        <h2 className="text-sm font-semibold text-slate-400">{name}</h2>
+        <p className="mt-4 text-sm text-slate-500">Data unavailable</p>
+      </div>
+    );
+  }
+
+  const change = close - previous;
+  const percentage = previous !== 0 ? (change / previous) * 100 : 0;
+
+  return (
+    <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
+      <h2 className="text-sm font-semibold text-slate-400">{name}</h2>
+
+      <p className="mt-4 text-3xl font-black text-white">
+        {formatNumber(close, decimals)}
+      </p>
+
+      <p className={`mt-2 text-sm font-bold ${changeColor(change)}`}>
+        {change > 0 ? "+" : ""}
+        {formatNumber(change, decimals)}{unit} (
+        {percentage > 0 ? "+" : ""}
+        {percentage.toFixed(2)}%)
+      </p>
+
+      {!compact && (
+        <p className="mt-4 text-xs text-slate-500">
+          Previous Close: {formatNumber(previous, decimals)}
+        </p>
+      )}
+
+      <p className="mt-4 text-xs text-slate-500">
+        Trade Date: {tradeDate ?? "—"}
+      </p>
+    </div>
+  );
+}
+
 export default async function SubscriberMarketBriefPage() {
   const supabase = await createClient();
 
@@ -18,7 +90,7 @@ export default async function SubscriberMarketBriefPage() {
 
   if (!user) redirect("/account/login");
 
-    const { data: profile, error: profileError } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
@@ -47,41 +119,48 @@ export default async function SubscriberMarketBriefPage() {
   }
 
   const [
-  { data: indexRows },
-  { data: vixData },
-  { data: breadth },
-] = await Promise.all([
-  supabase
-    .from("market_eod_indices")
-    .select("trade_date, index_symbol, open, high, low, close, previous_close")
-    .in("index_symbol", ["NIFTY", "SENSEX", "BANKNIFTY"])
-    .order("trade_date", { ascending: false }),
+    { data: indexRows },
+    { data: vixData },
+    { data: breadth },
+    { data: fiiDiiData },
+  ] = await Promise.all([
+    supabase
+      .from("market_eod_indices")
+      .select("trade_date, index_symbol, open, high, low, close, previous_close")
+      .in("index_symbol", ["NIFTY", "SENSEX", "BANKNIFTY"])
+      .order("trade_date", { ascending: false }),
 
-  supabase
-    .from("market_eod_vix")
-    .select("trade_date, open, high, low, close, previous_close")
-    .order("trade_date", { ascending: false })
-    .limit(1)
-    .maybeSingle(),
+    supabase
+      .from("market_eod_vix")
+      .select("trade_date, close, previous_close")
+      .order("trade_date", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
 
-  supabase
-    .from("market_eod_stocks")
-    .select("close, previous_close")
-    .order("trade_date", { ascending: false })
-    .limit(500),
-]);
+    supabase
+      .from("market_eod_stocks")
+      .select("close, previous_close")
+      .order("trade_date", { ascending: false })
+      .limit(500),
 
-const latestIndexData: Record<
-  string,
-  NonNullable<typeof indexRows>[number]
-> = {};
+    supabase
+      .from("market_eod_fii_dii")
+      .select("trade_date, fii_buy, fii_sell, fii_net, dii_buy, dii_sell, dii_net")
+      .order("trade_date", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
-for (const row of indexRows ?? []) {
-  if (!latestIndexData[row.index_symbol]) {
-    latestIndexData[row.index_symbol] = row;
+  const latestIndexData: Record<
+    string,
+    NonNullable<typeof indexRows>[number]
+  > = {};
+
+  for (const row of indexRows ?? []) {
+    if (!latestIndexData[row.index_symbol]) {
+      latestIndexData[row.index_symbol] = row;
+    }
   }
-}
-
 
   const advances = (breadth ?? []).filter(
     (row) => Number(row.close) > Number(row.previous_close)
@@ -93,9 +172,13 @@ for (const row of indexRows ?? []) {
 
   const unchanged = (breadth ?? []).length - advances - declines;
 
-  const ratio = declines > 0
-    ? (advances / declines).toFixed(2)
-    : "—";
+  const ratio =
+    declines > 0 ? (advances / declines).toFixed(2) : "—";
+
+  const total = breadth?.length ?? 0;
+
+  const fiiNet = fiiDiiData ? Number(fiiDiiData.fii_net) : null;
+  const diiNet = fiiDiiData ? Number(fiiDiiData.dii_net) : null;
 
   return (
     <PageShell>
@@ -116,161 +199,174 @@ for (const row of indexRows ?? []) {
           {indices.map((item) => {
             const data = latestIndexData[item.symbol];
 
-            if (!data) {
-              return (
-                <div key={item.symbol} className="rounded-xl border border-slate-700 bg-slate-900 p-6">
-                  <h2 className="font-bold text-slate-400">{item.name}</h2>
-                  <p className="mt-4 text-sm text-slate-500">Data unavailable</p>
-                </div>
-              );
-            }
-
-            const close = Number(data.close);
-            const previous = Number(data.previous_close);
-            const change = close - previous;
-            const percentage = previous > 0 ? (change / previous) * 100 : 0;
-            const positive = change > 0;
-            const negative = change < 0;
-
-            const changeColor = positive
-              ? "text-emerald-400"
-              : negative
-              ? "text-red-400"
-              : "text-slate-400";
-
             return (
-              <div key={item.symbol} className="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
-                <h2 className="text-sm font-semibold text-slate-400">{item.name}</h2>
-
-                <p className="mt-4 text-3xl font-black text-white">
-                  {close.toLocaleString("en-IN")}
-                </p>
-
-                <p className={`mt-2 text-sm font-bold ${changeColor}`}>
-                  {change > 0 ? "+" : ""}
-                  {change.toLocaleString("en-IN")} pts
-                  {" ("}
-                  {percentage > 0 ? "+" : ""}
-                  {percentage.toFixed(2)}%)
-                </p>
-
-                <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                  <p className="text-slate-400">Open: <span className="text-white">{Number(data.open).toLocaleString("en-IN")}</span></p>
-                  <p className="text-slate-400">High: <span className="text-white">{Number(data.high).toLocaleString("en-IN")}</span></p>
-                  <p className="text-slate-400">Low: <span className="text-white">{Number(data.low).toLocaleString("en-IN")}</span></p>
-                  <p className="text-slate-400">Prev. Close: <span className="text-white">{previous.toLocaleString("en-IN")}</span></p>
-                </div>
-
-                <p className="mt-4 text-xs text-slate-500">
-                  Trade Date: {data.trade_date}
-                </p>
-              </div>
+              <MarketCard
+                key={item.symbol}
+                name={item.name}
+                close={data ? Number(data.close) : null}
+                previous={data ? Number(data.previous_close) : null}
+                tradeDate={data?.trade_date ?? null}
+                decimals={2}
+              />
             );
           })}
+
+          <MarketCard
+            name="INDIA VIX"
+            close={vixData ? Number(vixData.close) : null}
+            previous={vixData ? Number(vixData.previous_close) : null}
+            tradeDate={vixData?.trade_date ?? null}
+            decimals={2}
+            compact
+          />
+
+          <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
+            <h2 className="text-sm font-semibold text-slate-400">
+              FII / DII ACTIVITY
+            </h2>
+
+            {fiiDiiData ? (
+              <>
+                <p className="mt-3 text-xs text-slate-500">
+                  Trade Date: {fiiDiiData.trade_date}
+                </p>
+
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-300">
+                      FII Activity
+                    </p>
+                    <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-400">
+                      <p>Buy: {formatNumber(Number(fiiDiiData.fii_buy), 0)}</p>
+                      <p>Sell: {formatNumber(Number(fiiDiiData.fii_sell), 0)}</p>
+                    </div>
+                    <p className={`mt-2 text-xl font-bold ${changeColor(fiiNet ?? 0)}`}>
+                      Net: {fiiNet !== null && fiiNet > 0 ? "+" : ""}
+                      {formatNumber(fiiNet ?? 0, 0)}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-slate-700 pt-3">
+                    <p className="text-sm font-semibold text-slate-300">
+                      DII Activity
+                    </p>
+                    <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-400">
+                      <p>Buy: {formatNumber(Number(fiiDiiData.dii_buy), 0)}</p>
+                      <p>Sell: {formatNumber(Number(fiiDiiData.dii_sell), 0)}</p>
+                    </div>
+                    <p className={`mt-2 text-xl font-bold ${changeColor(diiNet ?? 0)}`}>
+                      Net: {diiNet !== null && diiNet > 0 ? "+" : ""}
+                      {formatNumber(diiNet ?? 0, 0)}
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="mt-4">
+                <p className="text-sm text-slate-500">
+                  FII / DII data not available
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="mt-10 rounded-xl border border-slate-700 bg-slate-900/60 p-6">
+        <div className="mt-10">
+          <h2 className="mb-5 text-xl font-bold text-white">
+            Market Intelligence Indicators
+          </h2>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-5">
+              <h3 className="font-semibold text-white">Sector Data</h3>
+              <p className="mt-2 text-sm text-slate-400">
+                Sector performance
+              </p>
+              <p className="mt-4 text-xs font-semibold text-slate-500">
+                Coming Soon
+              </p>
+            </div>
+
+            <a
+              href="#market-breadth"
+              className="rounded-xl border border-cyan-500/40 bg-cyan-500/5 p-5 transition hover:border-cyan-400 hover:bg-cyan-500/10"
+            >
+              <h3 className="font-semibold text-white">
+                NIFTY 500 Market Breadth
+              </h3>
+              <p className="mt-2 text-sm text-slate-400">
+                Advance and decline analysis
+              </p>
+              <p className="mt-4 text-xs font-semibold text-cyan-400">
+                View Analysis ↓
+              </p>
+            </a>
+          </div>
+        </div>
+
+        <div
+          id="market-breadth"
+          className="mt-10 scroll-mt-8 rounded-xl border border-slate-700 bg-slate-900/60 p-6"
+        >
           <h2 className="text-xl font-bold text-white">
-            NIFTY 500 Market Breadth
+            NIFTY 500 Advance / Decline
           </h2>
 
           <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div>
               <p className="text-sm text-slate-400">Advances</p>
-              <p className="mt-2 text-2xl font-bold text-emerald-400">{advances}</p>
+              <p className="mt-2 text-2xl font-bold text-emerald-400">
+                {advances}
+              </p>
             </div>
+
             <div>
               <p className="text-sm text-slate-400">Declines</p>
-              <p className="mt-2 text-2xl font-bold text-red-400">{declines}</p>
+              <p className="mt-2 text-2xl font-bold text-red-400">
+                {declines}
+              </p>
             </div>
+
             <div>
               <p className="text-sm text-slate-400">Unchanged</p>
-              <p className="mt-2 text-2xl font-bold text-white">{unchanged}</p>
+              <p className="mt-2 text-2xl font-bold text-white">
+                {unchanged}
+              </p>
             </div>
+
             <div>
-              <p className="text-sm text-slate-400">Advance / Decline</p>
-              <p className="mt-2 text-2xl font-bold text-white">{ratio}</p>
+              <p className="text-sm text-slate-400">
+                Advance / Decline
+              </p>
+              <p className="mt-2 text-2xl font-bold text-white">
+                {ratio}
+              </p>
             </div>
           </div>
 
           <div className="mt-6 flex h-3 overflow-hidden rounded-full bg-slate-800">
-            <div className="bg-emerald-500" style={{ width: `${breadth?.length ? advances / breadth.length * 100 : 0}%` }} />
-            <div className="bg-red-500" style={{ width: `${breadth?.length ? declines / breadth.length * 100 : 0}%` }} />
-            <div className="bg-slate-500 flex-1" />
+            <div
+              className="bg-emerald-500"
+              style={{
+                width: `${total ? (advances / total) * 100 : 0}%`,
+              }}
+            />
+            <div
+              className="bg-red-500"
+              style={{
+                width: `${total ? (declines / total) * 100 : 0}%`,
+              }}
+            />
+            <div
+              className="bg-slate-500"
+              style={{
+                width: `${total ? (unchanged / total) * 100 : 0}%`,
+              }}
+            />
           </div>
 
           <p className="mt-4 text-xs text-slate-500">
             Based on available imported EOD stock records.
-          </p>
-        </div>
-
-        <div className="mt-8 rounded-xl border border-amber-500/30 bg-slate-900/60 p-6">
-          <h2 className="text-xl font-bold text-white">
-            India VIX
-          </h2>
-
-          {vixData ? (
-            <>
-              <p className="mt-4 text-3xl font-black text-white">
-                {Number(vixData.close).toFixed(2)}
-              </p>
-
-              {(() => {
-                const change =
-                  Number(vixData.close) -
-                  Number(vixData.previous_close);
-
-                const percentage =
-                  (change / Number(vixData.previous_close)) * 100;
-
-                const color =
-                  change > 0
-                    ? "text-red-400"
-                    : change < 0
-                    ? "text-emerald-400"
-                    : "text-slate-400";
-
-                return (
-                  <p className={`mt-2 text-sm font-bold ${color}`}>
-                    {change > 0 ? "+" : ""}
-                    {change.toFixed(2)} points (
-                    {percentage > 0 ? "+" : ""}
-                    {percentage.toFixed(2)}%)
-                  </p>
-                );
-              })()}
-
-              <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                <p className="text-slate-400">
-                  Open: <span className="text-white">{Number(vixData.open).toFixed(2)}</span>
-                </p>
-                <p className="text-slate-400">
-                  High: <span className="text-white">{Number(vixData.high).toFixed(2)}</span>
-                </p>
-                <p className="text-slate-400">
-                  Low: <span className="text-white">{Number(vixData.low).toFixed(2)}</span>
-                </p>
-                <p className="text-slate-400">
-                  Previous Close: <span className="text-white">{Number(vixData.previous_close).toFixed(2)}</span>
-                </p>
-              </div>
-
-              <p className="mt-4 text-xs text-slate-500">
-                Trade Date: {vixData.trade_date}
-              </p>
-            </>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">
-              India VIX data unavailable.
-            </p>
-          )}
-        </div>
-
-
-        <div className="mt-8 rounded-xl border border-cyan-500/30 bg-slate-900/50 p-6">
-          <h2 className="text-lg font-bold text-white">Market Intelligence</h2>
-          <p className="mt-2 text-sm text-slate-400">
-            India VIX, FII/DII activity, sector performance and additional market indicators will be introduced as verified data integrations become available.
           </p>
         </div>
       </section>

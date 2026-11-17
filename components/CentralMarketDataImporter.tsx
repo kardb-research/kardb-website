@@ -28,11 +28,17 @@ export default function CentralMarketDataImporter() {
   const [constituentFile, setConstituentFile] = useState<File | null>(null);
   const [eodFile, setEodFile] = useState<File | null>(null);
   const [indexFile, setIndexFile] = useState<File | null>(null);
+
   const [indexResult, setIndexResult] = useState<ImportStatus | null>(null);
   const [indexLoading, setIndexLoading] = useState(false);
-  const [vixFile, setVixFile] = useState<File | null>(null);
-  const [vixResult, setVixResult] = useState<ImportStatus | null>(null);
-  const [vixLoading, setVixLoading] = useState(false);
+
+  const [fiiDiiFile, setFiiDiiFile] = useState<File | null>(null);
+  const [fiiDiiResult, setFiiDiiResult] = useState<ImportStatus | null>(null);
+  const [fiiDiiLoading, setFiiDiiLoading] = useState(false);
+
+const [vixFile, setVixFile] = useState<File | null>(null);
+const [vixResult, setVixResult] = useState<ImportStatus | null>(null);
+const [vixLoading, setVixLoading] = useState(false);
 
   const [snapshotDate, setSnapshotDate] = useState("");
   const [tradeDate, setTradeDate] = useState("");
@@ -47,36 +53,6 @@ export default function CentralMarketDataImporter() {
   const [eodResult, setEodResult] =
     useState<ImportStatus | null>(null);
 
-  async function uploadVixFile() {
-    if (!vixFile) return;
-
-    setVixLoading(true);
-    setVixResult(null);
-
-    const formData = new FormData();
-    formData.append("file", vixFile);
-
-    try {
-      const response = await fetch("/api/admin/market-data/vix", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      setVixResult({
-        ...data,
-        message: data.message || data.error,
-      });
-    } catch {
-      setVixResult({
-        success: false,
-        error: "India VIX upload failed. Please try again.",
-      });
-    } finally {
-      setVixLoading(false);
-    }
-  }
   async function uploadIndexFile() {
     if (!indexFile) return;
 
@@ -94,10 +70,20 @@ export default function CentralMarketDataImporter() {
 
       const data = await response.json();
 
+      if (!response.ok) {
+        setIndexResult({
+          error: data.error || "Index data import failed.",
+        });
+        return;
+      }
+
       setIndexResult({
         ...data,
         message: data.message || data.error,
       });
+
+      setIndexFile(null);
+      clearFileInput("central-index-csv");
     } catch {
       setIndexResult({
         success: false,
@@ -107,6 +93,95 @@ export default function CentralMarketDataImporter() {
       setIndexLoading(false);
     }
   }
+
+  async function uploadFiiDiiFile() {
+    if (!fiiDiiFile) return;
+
+    if (fiiDiiFile.size > 2 * 1024 * 1024) {
+      setFiiDiiResult({
+        error: "File size must not exceed 2 MB.",
+      });
+      return;
+    }
+
+    setFiiDiiLoading(true);
+    setFiiDiiResult(null);
+
+    const formData = new FormData();
+    formData.append("file", fiiDiiFile);
+
+    try {
+      const response = await fetch("/api/admin/market-data/fii-dii", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setFiiDiiResult({
+          error: data.error || "FII/DII import failed.",
+        });
+        return;
+      }
+
+      setFiiDiiResult(data);
+      setFiiDiiFile(null);
+      clearFileInput("central-fii-dii-csv");
+    } catch {
+      setFiiDiiResult({
+        success: false,
+        error: "FII/DII upload failed. Please try again.",
+      });
+    } finally {
+      setFiiDiiLoading(false);
+    }
+  }
+
+  async function uploadVixFile() {
+    if (!vixFile) return;
+
+    if (vixFile.size > 2 * 1024 * 1024) {
+      setVixResult({
+        error: "File size must not exceed 2 MB.",
+      });
+      return;
+    }
+
+    setVixLoading(true);
+    setVixResult(null);
+
+    const formData = new FormData();
+    formData.append("file", vixFile);
+
+    try {
+      const response = await fetch("/api/admin/market-data/vix", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setVixResult({
+          error: data.error || "India VIX import failed.",
+        });
+        return;
+      }
+
+      setVixResult(data);
+      setVixFile(null);
+      clearFileInput("central-vix-csv");
+    } catch {
+      setVixResult({
+        success: false,
+        error: "India VIX upload failed. Please try again.",
+      });
+    } finally {
+      setVixLoading(false);
+    }
+  }
+
   async function uploadFile(
     type: ImportType,
     file: File,
@@ -202,7 +277,6 @@ export default function CentralMarketDataImporter() {
     setLoading(null);
   }
 
- 
   async function runImportAll() {
     if (
       !constituentFile ||
@@ -213,7 +287,6 @@ export default function CentralMarketDataImporter() {
       return;
     }
 
-    // Snapshot must not be newer than the trading date.
     if (snapshotDate > tradeDate) {
       setConstituentResult({
         error: "Snapshot date cannot be later than the trade date.",
@@ -235,7 +308,6 @@ export default function CentralMarketDataImporter() {
     setConstituentResult(null);
     setEodResult(null);
 
-    // Step 1: Import constituents first.
     const constituentResponse = await uploadFile(
       "constituents",
       constituentFile,
@@ -245,7 +317,6 @@ export default function CentralMarketDataImporter() {
     setConstituentResult(constituentResponse);
 
     if (!constituentResponse.success) {
-      // Do not import EOD using an unverified or old snapshot.
       setEodResult({
         error:
           "EOD import skipped because the constituent import failed. " +
@@ -259,7 +330,6 @@ export default function CentralMarketDataImporter() {
     setConstituentFile(null);
     clearFileInput("central-constituent-csv");
 
-    // Step 2: Import EOD only after successful constituent import.
     const eodResponse = await uploadFile(
       "eod",
       eodFile,
@@ -275,7 +345,6 @@ export default function CentralMarketDataImporter() {
 
     setLoading(null);
   }
-
 
   function ResultPanel({
     title,
@@ -352,7 +421,8 @@ export default function CentralMarketDataImporter() {
     );
   }
 
-  const busy = loading !== null;
+  const busy =
+    loading !== null || indexLoading || fiiDiiLoading || vixLoading;
 
   return (
     <section className="mt-10 rounded-2xl border border-cyan-500/30 bg-slate-900/70 p-6">
@@ -371,7 +441,6 @@ export default function CentralMarketDataImporter() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Constituents Import */}
         <div className="rounded-xl border border-slate-700 bg-slate-950/60 p-5">
           <h3 className="text-lg font-bold text-white">
             1. NIFTY 500 Constituents
@@ -434,7 +503,6 @@ export default function CentralMarketDataImporter() {
           />
         </div>
 
-        {/* EOD Import */}
         <div className="rounded-xl border border-slate-700 bg-slate-950/60 p-5">
           <h3 className="text-lg font-bold text-white">
             2. NSE EOD Market Data
@@ -495,7 +563,7 @@ export default function CentralMarketDataImporter() {
           />
         </div>
       </div>
-      {/* Index EOD Import */}
+
       <div className="mt-7 rounded-xl border border-violet-500/30 bg-violet-500/5 p-5">
         <h3 className="text-lg font-bold text-white">
           Index EOD Data Import
@@ -506,18 +574,20 @@ export default function CentralMarketDataImporter() {
         </p>
 
         <input
+          id="central-index-csv"
           type="file"
-          accept=".csv"
-          disabled={indexLoading || busy}
-          onChange={(event) =>
-            setIndexFile(event.target.files?.[0] || null)
-          }
+          accept=".csv,text/csv"
+          disabled={busy}
+          onChange={(event) => {
+            setIndexFile(event.target.files?.[0] || null);
+            setIndexResult(null);
+          }}
           className="mt-4 w-full rounded-lg border border-slate-700 bg-slate-900 p-3 text-sm text-white"
         />
 
         <button
           type="button"
-          disabled={!indexFile || indexLoading || busy}
+          disabled={!indexFile || busy}
           onClick={uploadIndexFile}
           className="mt-4 w-full rounded-lg bg-violet-500 px-4 py-3 text-sm font-bold text-white disabled:opacity-40"
         >
@@ -527,7 +597,7 @@ export default function CentralMarketDataImporter() {
         {indexResult && (
           <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900 p-4">
             <p className="text-sm font-bold text-white">
-              {indexResult.success ? "Import Successful" : "Import Failed"}
+              {indexResult.error ? "Import Failed" : "Import Successful"}
             </p>
             <p className="mt-2 text-sm text-slate-300">
               {indexResult.message || indexResult.error || "No response message"}
@@ -540,53 +610,167 @@ export default function CentralMarketDataImporter() {
           </div>
         )}
       </div>
+
       {/* India VIX Import */}
       <div className="mt-7 rounded-xl border border-amber-500/30 bg-amber-500/5 p-5">
         <h3 className="text-lg font-bold text-white">
-          India VIX Data Import
+          India VIX EOD Import
         </h3>
 
         <p className="mt-2 text-sm text-slate-400">
-          Upload daily India VIX OHLC data through CSV.
+          Upload daily India VIX OHLC data.
         </p>
 
+        <div className="mt-4 rounded-lg border border-slate-700 bg-slate-950/60 p-4">
+          <p className="text-sm font-semibold text-slate-300">
+            Required CSV columns
+          </p>
+          <code className="mt-2 block break-all text-xs text-amber-300">
+            trade_date,open,high,low,close,previous_close
+          </code>
+          <p className="mt-2 text-xs text-slate-500">
+            Use one row per trading date. Maximum file size: 2 MB.
+          </p>
+        </div>
+
+        <label
+          htmlFor="central-vix-csv"
+          className="mb-2 mt-5 block text-sm text-slate-300"
+        >
+          India VIX CSV File
+        </label>
+
         <input
+          id="central-vix-csv"
           type="file"
-          accept=".csv"
-          disabled={vixLoading || busy}
-          onChange={(event) =>
-            setVixFile(event.target.files?.[0] || null)
-          }
-          className="mt-4 w-full rounded-lg border border-slate-700 bg-slate-900 p-3 text-sm text-white"
+          accept=".csv,text/csv"
+          disabled={busy}
+          onChange={(event) => {
+            setVixFile(event.target.files?.[0] ?? null);
+            setVixResult(null);
+          }}
+          className="w-full rounded-lg border border-slate-700 bg-slate-900 p-3 text-sm text-white"
         />
 
         <button
           type="button"
-          disabled={!vixFile || vixLoading || busy}
+          disabled={!vixFile || busy}
           onClick={uploadVixFile}
-          className="mt-4 w-full rounded-lg bg-amber-500 px-4 py-3 text-sm font-bold text-slate-950 disabled:opacity-40"
+          className="mt-5 w-full rounded-lg bg-amber-400 px-4 py-3 text-sm font-bold text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {vixLoading ? "Importing VIX Data..." : "Import India VIX Data"}
+          {vixLoading ? "Importing India VIX..." : "Import India VIX Data"}
         </button>
 
         {vixResult && (
-          <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900 p-4">
-            <p className="text-sm font-bold text-white">
-              {vixResult.success ? "Import Successful" : "Import Failed"}
+          <div
+            role="status"
+            className={`mt-4 rounded-lg border p-4 ${
+              vixResult.error
+                ? "border-red-500/30 bg-red-500/10"
+                : "border-emerald-500/30 bg-emerald-500/10"
+            }`}
+          >
+            <p
+              className={`font-semibold ${
+                vixResult.error ? "text-red-400" : "text-emerald-400"
+              }`}
+            >
+              {vixResult.error ? "Import Failed" : "Import Successful"}
             </p>
+
             <p className="mt-2 text-sm text-slate-300">
-              {vixResult.message || vixResult.error || "No response message"}
+              {vixResult.message || vixResult.error}
             </p>
-            {vixResult.imported_records !== undefined && (
-              <p className="mt-2 text-sm text-emerald-400">
-                Records imported: {vixResult.imported_records}
+
+            {!vixResult.error && (
+              <p className="mt-2 text-sm text-emerald-300">
+                Records imported: {vixResult.imported_records ?? "—"}
               </p>
             )}
           </div>
         )}
       </div>
 
-      {/* Import All */}
+      {/* FII / DII Import */}
+      <div className="mt-7 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-5">
+        <h3 className="text-lg font-bold text-white">
+          FII / DII Activity Import
+        </h3>
+
+        <p className="mt-2 text-sm text-slate-400">
+          Upload daily institutional buying and selling data.
+        </p>
+
+        <div className="mt-4 rounded-lg border border-slate-700 bg-slate-950/60 p-4">
+          <p className="text-sm font-semibold text-slate-300">
+            Required CSV columns
+          </p>
+          <code className="mt-2 block break-all text-xs text-emerald-300">
+            trade_date,fii_buy,fii_sell,dii_buy,dii_sell
+          </code>
+          <p className="mt-2 text-xs text-slate-500">
+            Net values are calculated automatically during import.
+          </p>
+        </div>
+
+        <label
+          htmlFor="central-fii-dii-csv"
+          className="mb-2 mt-5 block text-sm text-slate-300"
+        >
+          FII / DII CSV File
+        </label>
+
+        <input
+          id="central-fii-dii-csv"
+          type="file"
+          accept=".csv,text/csv"
+          disabled={busy}
+          onChange={(event) => {
+            setFiiDiiFile(event.target.files?.[0] ?? null);
+            setFiiDiiResult(null);
+          }}
+          className="w-full rounded-lg border border-slate-700 bg-slate-900 p-3 text-sm text-white"
+        />
+
+        <button
+          type="button"
+          disabled={!fiiDiiFile || busy}
+          onClick={uploadFiiDiiFile}
+          className="mt-5 w-full rounded-lg bg-emerald-500 px-4 py-3 text-sm font-bold text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {fiiDiiLoading ? "Importing FII / DII..." : "Import FII / DII Data"}
+        </button>
+
+        {fiiDiiResult && (
+          <div
+            role="status"
+            className={`mt-4 rounded-lg border p-4 ${
+              fiiDiiResult.error
+                ? "border-red-500/30 bg-red-500/10"
+                : "border-emerald-500/30 bg-emerald-500/10"
+            }`}
+          >
+            <p
+              className={`font-semibold ${
+                fiiDiiResult.error ? "text-red-400" : "text-emerald-400"
+              }`}
+            >
+              {fiiDiiResult.error ? "Import Failed" : "Import Successful"}
+            </p>
+
+            <p className="mt-2 text-sm text-slate-300">
+              {fiiDiiResult.message || fiiDiiResult.error}
+            </p>
+
+            {!fiiDiiResult.error && (
+              <p className="mt-2 text-sm text-emerald-300">
+                Records imported: {fiiDiiResult.imported_records ?? "—"}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="mt-7 rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-5">
         <h3 className="text-lg font-bold text-white">
           Central Import Control
@@ -617,7 +801,6 @@ export default function CentralMarketDataImporter() {
         </p>
       </div>
 
-      {/* Future integrations */}
       <div className="mt-7">
         <h3 className="mb-3 text-lg font-bold text-white">
           Upcoming Data Integrations
@@ -625,10 +808,7 @@ export default function CentralMarketDataImporter() {
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            "NIFTY 50 / SENSEX / BANK NIFTY",
-            "India VIX",
             "USD / INR",
-            "FII / DII Activity",
             "NIFTY P/E and P/B",
           ].map((item) => (
             <div

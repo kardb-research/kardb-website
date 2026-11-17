@@ -8,23 +8,18 @@ export const runtime = "nodejs";
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const MAX_RECORDS = 5000;
 
-const EXPECTED_HEADERS = [
-  "MKT",
-  "SERIES",
-  "SYMBOL",
-  "SECURITY",
-  "PREV_CL_PR",
-  "OPEN_PRICE",
-  "HIGH_PRICE",
-  "LOW_PRICE",
-  "CLOSE_PRICE",
-  "NET_TRDVAL",
-  "NET_TRDQTY",
-  "IND_SEC",
-  "CORP_IND",
-  "TRADES",
-  "HI_52_WK",
-  "LO_52_WK",
+const REQUIRED_HEADERS = [
+  "TradDt",
+  "Sgmt",
+  "FinInstrmTp",
+  "TckrSymb",
+  "SctySrs",
+  "OpnPric",
+  "HghPric",
+  "LwPric",
+  "ClsPric",
+  "PrvsClsgPric",
+  "TtlTradgVol",
 ];
 
 function numberValue(value: unknown): number | null {
@@ -72,7 +67,7 @@ export async function POST(request: Request) {
 
     if (!(file instanceof File) || file.size === 0) {
       return NextResponse.json(
-        { error: "Please select an NSE CSV file." },
+        { error: "Please select an NSE Common Bhavcopy CSV file." },
         { status: 400 }
       );
     }
@@ -91,6 +86,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      return NextResponse.json(
+        { error: "Only NSE CSV files are accepted." },
+        { status: 400 }
+      );
+    }
+
     const csvText = await file.text();
 
     const rows = parse(csvText, {
@@ -99,6 +101,7 @@ export async function POST(request: Request) {
       trim: true,
       bom: true,
       relax_column_count: false,
+      max_record_size: 20000,
     }) as Record<string, string>[];
 
     if (rows.length === 0 || rows.length > MAX_RECORDS) {
@@ -110,14 +113,37 @@ export async function POST(request: Request) {
 
     const actualHeaders = Object.keys(rows[0]);
 
+    const missingHeaders = REQUIRED_HEADERS.filter(
+      (header) => !actualHeaders.includes(header)
+    );
+
+    if (missingHeaders.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Invalid NSE Common Bhavcopy format.",
+          missing_headers: missingHeaders,
+          received_headers: actualHeaders,
+        },
+        { status: 400 }
+      );
+    }
+
+    const fileDates = new Set(
+      rows
+        .map((row) => String(row.TradDt || "").trim())
+        .filter(Boolean)
+    );
+
     if (
-      actualHeaders.length !== EXPECTED_HEADERS.length ||
-      EXPECTED_HEADERS.some((header) => !actualHeaders.includes(header))
+      fileDates.size !== 1 ||
+      !fileDates.has(tradeDate)
     ) {
       return NextResponse.json(
         {
-          error: "Invalid NSE CSV format. Expected the NSE PD file headers.",
-          received_headers: actualHeaders,
+          error:
+            "The CSV trading date does not match the selected Trade Date.",
+          file_dates: Array.from(fileDates),
+          selected_trade_date: tradeDate,
         },
         { status: 400 }
       );
@@ -133,15 +159,9 @@ export async function POST(request: Request) {
       .limit(1)
       .maybeSingle();
 
-if (snapshotError) {
-  console.error("NIFTY500 snapshot lookup error:", snapshotError);
-}
-    console.log("NIFTY500 SNAPSHOT DEBUG:", {
-  tradeDate,
-  snapshot,
-  snapshotError,
-});
     if (snapshotError || !snapshot) {
+      console.error("NIFTY500 snapshot lookup error:", snapshotError);
+
       return NextResponse.json(
         {
           error:
@@ -194,10 +214,19 @@ if (snapshotError) {
     const duplicateRecords: string[] = [];
 
     for (const row of rows) {
-      const symbol = String(row.SYMBOL || "").trim().toUpperCase();
-      const series = String(row.SERIES || "").trim().toUpperCase();
+      const segment = String(row.Sgmt || "").trim().toUpperCase();
+      const instrumentType = String(row.FinInstrmTp || "")
+        .trim()
+        .toUpperCase();
 
-      // Ignore index rows and blank-symbol rows.
+      // Only cash-market security records are relevant.
+      if (segment !== "CM" || instrumentType !== "STK") {
+        continue;
+      }
+
+      const symbol = String(row.TckrSymb || "").trim().toUpperCase();
+      const series = String(row.SctySrs || "").trim().toUpperCase();
+
       if (!symbol || !series) continue;
 
       const key = `${symbol}|${series}`;
@@ -215,12 +244,12 @@ if (snapshotError) {
 
       seen.add(key);
 
-      const open = numberValue(row.OPEN_PRICE);
-      const high = numberValue(row.HIGH_PRICE);
-      const low = numberValue(row.LOW_PRICE);
-      const close = numberValue(row.CLOSE_PRICE);
-      const previousClose = numberValue(row.PREV_CL_PR);
-      const volume = numberValue(row.NET_TRDQTY);
+      const open = numberValue(row.OpnPric);
+      const high = numberValue(row.HghPric);
+      const low = numberValue(row.LwPric);
+      const close = numberValue(row.ClsPric);
+      const previousClose = numberValue(row.PrvsClsgPric);
+      const volume = numberValue(row.TtlTradgVol);
 
       if (
         open === null ||
@@ -254,13 +283,12 @@ if (snapshotError) {
         close,
         previous_close: previousClose,
         volume,
-        source: "NSE_PD_BHAVCOPY",
+        source: "NSE_COMMON_BHAVCOPY",
       });
 
       importedKeys.add(key);
     }
 
-    // Report every constituent not found in valid import records.
     const missingStocks = constituents
       .filter((item) => {
         const key = `${String(item.symbol).trim().toUpperCase()}|${String(
@@ -305,7 +333,7 @@ if (snapshotError) {
 
     return NextResponse.json({
       success: true,
-      message: "NSE EOD data imported successfully.",
+      message: "NSE Common Bhavcopy imported successfully.",
       trade_date: tradeDate,
       snapshot_date: snapshot.snapshot_date,
       total_constituents: constituents.length,
@@ -322,10 +350,10 @@ if (snapshotError) {
       source_file: file.name,
     });
   } catch (error) {
-    console.error("NSE EOD import error:", error);
+    console.error("NSE Common Bhavcopy import error:", error);
 
     return NextResponse.json(
-      { error: "Unable to process NSE EOD file." },
+      { error: "Unable to process NSE Common Bhavcopy file." },
       { status: 500 }
     );
   }

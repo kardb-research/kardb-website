@@ -10,40 +10,44 @@ const indexCards = [
   { name: "BANK NIFTY", symbol: "BANKNIFTY" },
 ];
 
-const marketSections = [
-  { name: "NIFTY 500 Advance–Decline", active: true },
-  { name: "Market Health Score", active: true },
-  { name: "India VIX", active: true },
-  { name: "FII / DII Activity", active: false },
-  { name: "USD / INR", active: false },
-  { name: "NIFTY P/E and P/B", active: false },
-  { name: "Sector Performance", active: false },
-  { name: "Top Gainers and Losers", active: false },
-];
+function getChangeColor(change: number) {
+  if (change > 0) return "text-emerald-400";
+  if (change < 0) return "text-red-400";
+  return "text-slate-400";
+}
 
 export default async function MarketBriefAdminPage() {
   const { supabase } = await requireAdmin();
 
-  const { data: indexRows, error: indexError } = await supabase
+  const { data: indexRows } = await supabase
     .from("market_eod_indices")
     .select("trade_date, index_symbol, open, high, low, close, previous_close")
     .in("index_symbol", ["NIFTY", "SENSEX", "BANKNIFTY"])
     .order("trade_date", { ascending: false });
 
-  const { data: vixData, error: vixError } = await supabase
+  const { data: vixData } = await supabase
     .from("market_eod_vix")
-    .select("trade_date, open, high, low, close, previous_close")
+    .select("trade_date, close, previous_close")
     .order("trade_date", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  const latestIndexData: Record<string, NonNullable<typeof indexRows>[number]> = {};
+  const latestIndexData: Record<
+    string,
+    NonNullable<typeof indexRows>[number]
+  > = {};
 
   for (const row of indexRows ?? []) {
     if (!latestIndexData[row.index_symbol]) {
       latestIndexData[row.index_symbol] = row;
     }
   }
+
+  const vixClose = vixData ? Number(vixData.close) : 0;
+  const vixPrevious = vixData ? Number(vixData.previous_close) : 0;
+  const vixChange = vixClose - vixPrevious;
+  const vixPercentage =
+    vixPrevious > 0 ? (vixChange / vixPrevious) * 100 : 0;
 
   return (
     <PageShell>
@@ -58,204 +62,166 @@ export default async function MarketBriefAdminPage() {
           </h1>
 
           <p className="mt-2 text-slate-400">
-            Daily market intelligence, breadth and institutional activity.
-          </p>
-
-          <p className="mt-3 text-sm text-emerald-400">
-            Historical NSE EOD data connected — NIFTY 500 breadth analysis active.
+            Daily market overview, volatility, institutional activity and market breadth.
           </p>
         </div>
 
+        {/* Main Market Cards */}
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {indexCards.map((item) => (
-            <div
-              key={item.symbol}
-              className="rounded-xl border border-slate-700 bg-slate-900/60 p-6"
-            >
-              <p className="text-sm font-semibold text-slate-400">
-                {item.name}
-              </p>
+          {indexCards.map((item) => {
+            const data = latestIndexData[item.symbol];
 
-                            {latestIndexData[item.symbol] ? (
-                <>
-                  <p className="mt-4 text-3xl font-black text-white">
-                    {Number(latestIndexData[item.symbol].close).toLocaleString("en-IN")}
+            if (!data) {
+              return (
+                <div
+                  key={item.symbol}
+                  className="rounded-xl border border-slate-700 bg-slate-900/60 p-6"
+                >
+                  <p className="text-sm font-semibold text-slate-400">
+                    {item.name}
                   </p>
-
-                  <p className="mt-2 text-xs text-slate-400">
-                    Previous Close:{" "}
-                    {Number(latestIndexData[item.symbol].previous_close).toLocaleString("en-IN")}
+                  <p className="mt-4 text-sm text-slate-500">
+                    Waiting for verified market data
                   </p>
-                  <p
-                    className={`text-sm font-bold ${
-                      Number(latestIndexData[item.symbol].close) >
-                      Number(latestIndexData[item.symbol].previous_close)
-                        ? "text-emerald-400"
-                        : Number(latestIndexData[item.symbol].close) <
-                          Number(latestIndexData[item.symbol].previous_close)
-                        ? "text-red-400"
-                        : "text-slate-400"
-                    }`}
-                  >
-                    {Number(latestIndexData[item.symbol].close) -
-                      Number(latestIndexData[item.symbol].previous_close) > 0
-                      ? "+"
-                      : ""}
-                    {(
-                      Number(latestIndexData[item.symbol].close) -
-                      Number(latestIndexData[item.symbol].previous_close)
-                    ).toLocaleString("en-IN")} pts
-                  </p>
-                  <p
-                    className={`mt-2 text-sm font-bold ${
-                      Number(latestIndexData[item.symbol].close) >
-                      Number(latestIndexData[item.symbol].previous_close)
-                        ? "text-emerald-400"
-                        : Number(latestIndexData[item.symbol].close) <
-                          Number(latestIndexData[item.symbol].previous_close)
-                        ? "text-red-400"
-                        : "text-slate-400"
-                    }`}
-                  >
-                    {Number(latestIndexData[item.symbol].close) >
-                    Number(latestIndexData[item.symbol].previous_close)
-                      ? "+"
-                      : ""}
-                    {(
-                      ((Number(latestIndexData[item.symbol].close) -
-                        Number(latestIndexData[item.symbol].previous_close)) /
-                        Number(latestIndexData[item.symbol].previous_close)) *
-                      100
-                    ).toFixed(2)}
-                    %
-                  </p>
+                </div>
+              );
+            }
 
-                  <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                    <p className="text-slate-400">
-                      Open: <span className="text-white">
-                        {Number(latestIndexData[item.symbol].open).toLocaleString("en-IN")}
-                      </span>
-                    </p>
-                    <p className="text-slate-400">
-                      High: <span className="text-white">
-                        {Number(latestIndexData[item.symbol].high).toLocaleString("en-IN")}
-                      </span>
-                    </p>
-                    <p className="text-slate-400">
-                      Low: <span className="text-white">
-                        {Number(latestIndexData[item.symbol].low).toLocaleString("en-IN")}
-                      </span>
-                    </p>
-                  </div>
+            const close = Number(data.close);
+            const previous = Number(data.previous_close);
+            const change = close - previous;
+            const percentage =
+              previous > 0 ? (change / previous) * 100 : 0;
 
-                  <p className="mt-3 text-xs text-emerald-400">
-                    Data: {latestIndexData[item.symbol].trade_date}
-                  </p>
-                </>
-              ) : (
-                <p className="mt-4 text-sm text-slate-500">
-                  Waiting for verified market data
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="mt-8 rounded-xl border border-amber-500/30 bg-slate-900/60 p-6">
-          <h2 className="text-xl font-bold text-white">India VIX</h2>
+            const changeColor = getChangeColor(change);
 
-          {vixData ? (
-            <>
-              <p className="mt-4 text-3xl font-black text-white">
-                {Number(vixData.close).toFixed(2)}
-              </p>
-
-              {(() => {
-                const change =
-                  Number(vixData.close) - Number(vixData.previous_close);
-                const percentage =
-                  (change / Number(vixData.previous_close)) * 100;
-                const color =
-                  change > 0
-                    ? "text-red-400"
-                    : change < 0
-                    ? "text-emerald-400"
-                    : "text-slate-400";
-
-                return (
-                  <p className={`mt-2 text-sm font-bold ${color}`}>
-                    {change > 0 ? "+" : ""}
-                    {change.toFixed(2)} points (
-                    {percentage > 0 ? "+" : ""}
-                    {percentage.toFixed(2)}%)
-                  </p>
-                );
-              })()}
-
-              <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                <p className="text-slate-400">Open: <span className="text-white">{Number(vixData.open).toFixed(2)}</span></p>
-                <p className="text-slate-400">High: <span className="text-white">{Number(vixData.high).toFixed(2)}</span></p>
-                <p className="text-slate-400">Low: <span className="text-white">{Number(vixData.low).toFixed(2)}</span></p>
-                <p className="text-slate-400">Previous Close: <span className="text-white">{Number(vixData.previous_close).toFixed(2)}</span></p>
-              </div>
-
-              <p className="mt-4 text-xs text-slate-500">
-                Trade Date: {vixData.trade_date}
-              </p>
-            </>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">
-              India VIX data unavailable.
-            </p>
-          )}
-        </div>
-
-        <div className="mt-10">
-          <h2 className="mb-5 text-xl font-bold text-white">
-            Market Intelligence Indicators
-          </h2>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {marketSections.map((section) => (
+            return (
               <div
-                key={section.name}
-                className="rounded-xl border border-slate-700 bg-slate-950/50 p-5"
+                key={item.symbol}
+                className="rounded-xl border border-slate-700 bg-slate-900/60 p-6"
               >
-                <h3 className="font-semibold text-white">
-                  {section.name}
-                </h3>
+                <p className="text-sm font-semibold text-slate-400">
+                  {item.name}
+                </p>
+
+                <p className="mt-4 text-3xl font-black text-white">
+                  {close.toLocaleString("en-IN")}
+                </p>
+
+                <p className="mt-2 text-xs text-slate-400">
+                  Previous Close: {previous.toLocaleString("en-IN")}
+                </p>
+
+                <p className={`mt-2 text-sm font-bold ${changeColor}`}>
+                  {change > 0 ? "+" : ""}
+                  {change.toLocaleString("en-IN")} pts
+                </p>
+
+                <p className={`mt-2 text-sm font-bold ${changeColor}`}>
+                  {percentage > 0 ? "+" : ""}
+                  {percentage.toFixed(2)}%
+                </p>
+
+                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <p className="text-slate-400">
+                    Open:{" "}
+                    <span className="text-white">
+                      {Number(data.open).toLocaleString("en-IN")}
+                    </span>
+                  </p>
+
+                  <p className="text-slate-400">
+                    High:{" "}
+                    <span className="text-white">
+                      {Number(data.high).toLocaleString("en-IN")}
+                    </span>
+                  </p>
+
+                  <p className="text-slate-400">
+                    Low:{" "}
+                    <span className="text-white">
+                      {Number(data.low).toLocaleString("en-IN")}
+                    </span>
+                  </p>
+                </div>
+
+                <p className="mt-3 text-xs text-emerald-400">
+                  Data: {data.trade_date}
+                </p>
+              </div>
+            );
+          })}
+
+          {/* India VIX */}
+          <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
+            <p className="text-sm font-semibold text-slate-400">
+              INDIA VIX
+            </p>
+
+            {vixData ? (
+              <>
+                <p className="mt-4 text-3xl font-black text-white">
+                  {vixClose.toFixed(2)}
+                </p>
+
+                <p className="mt-2 text-xs text-slate-400">
+                  Previous Close: {vixPrevious.toFixed(2)}
+                </p>
 
                 <p
-                  className={`mt-3 text-sm ${
-                    section.active
-                      ? "text-emerald-400"
-                      : "text-slate-500"
-                  }`}
+                  className={`mt-2 text-sm font-bold ${getChangeColor(vixChange)}`}
                 >
-                  {section.active ? "Active" : "Data integration pending"}
+                  {vixChange > 0 ? "+" : ""}
+                  {vixChange.toFixed(2)} pts
                 </p>
-              </div>
-            ))}
+
+                <p
+                  className={`mt-2 text-sm font-bold ${getChangeColor(vixChange)}`}
+                >
+                  {vixPercentage > 0 ? "+" : ""}
+                  {vixPercentage.toFixed(2)}%
+                </p>
+
+                <p className="mt-4 text-xs text-emerald-400">
+                  Data: {vixData.trade_date}
+                </p>
+              </>
+            ) : (
+              <p className="mt-4 text-sm text-slate-500">
+                Waiting for verified India VIX data
+              </p>
+            )}
+          </div>
+
+          {/* FII / DII Activity */}
+          <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
+            <p className="text-sm font-semibold text-slate-400">
+              FII / DII ACTIVITY
+            </p>
+
+            <p className="mt-4 text-2xl font-black text-white">
+              Awaiting Data
+            </p>
+
+            <p className="mt-2 text-sm text-slate-400">
+              FII Net Buy / Sell
+            </p>
+
+            <p className="mt-2 text-sm text-slate-400">
+              DII Net Buy / Sell
+            </p>
+
+            <p className="mt-4 text-xs font-semibold text-amber-400">
+              Data integration pending
+            </p>
           </div>
         </div>
 
+        {/* Market Breadth */}
         <MarketBreadthPanel />
 
+        {/* Market Data Importer */}
         <CentralMarketDataImporter />
-
-        <div className="mt-10 rounded-xl border border-cyan-500/30 bg-slate-900/50 p-6">
-          <h2 className="text-lg font-bold text-white">
-            Automatic Market Updates
-          </h2>
-
-          <p className="mt-2 text-sm text-slate-400">
-            Automatic market updates will be enabled once an authorised
-            market data provider is connected.
-          </p>
-
-          <p className="mt-3 text-xs text-slate-500">
-            All displayed values will include their data timestamp.
-          </p>
-        </div>
       </section>
     </PageShell>
   );
