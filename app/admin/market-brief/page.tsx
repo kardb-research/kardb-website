@@ -1,4 +1,3 @@
-
 import PageShell from "@/components/PageShell";
 import { requireAdmin } from "@/lib/supabase/admin";
 import CentralMarketDataImporter from "@/components/CentralMarketDataImporter";
@@ -16,6 +15,13 @@ function getChangeColor(change: number) {
   return "text-slate-400";
 }
 
+function formatIndianNumber(value: number) {
+  return value.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 export default async function MarketBriefAdminPage() {
   const { supabase } = await requireAdmin();
 
@@ -28,6 +34,13 @@ export default async function MarketBriefAdminPage() {
   const { data: vixData } = await supabase
     .from("market_eod_vix")
     .select("trade_date, close, previous_close")
+    .order("trade_date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { data: fiiDiiData } = await supabase
+    .from("market_eod_fii_dii")
+    .select("trade_date, fii_buy, fii_sell, dii_buy, dii_sell")
     .order("trade_date", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -48,6 +61,13 @@ export default async function MarketBriefAdminPage() {
   const vixChange = vixClose - vixPrevious;
   const vixPercentage =
     vixPrevious > 0 ? (vixChange / vixPrevious) * 100 : 0;
+
+  const fiiBuy = fiiDiiData ? Number(fiiDiiData.fii_buy) : 0;
+  const fiiSell = fiiDiiData ? Number(fiiDiiData.fii_sell) : 0;
+  const diiBuy = fiiDiiData ? Number(fiiDiiData.dii_buy) : 0;
+  const diiSell = fiiDiiData ? Number(fiiDiiData.dii_sell) : 0;
+  const fiiNet = fiiBuy - fiiSell;
+  const diiNet = diiBuy - diiSell;
 
   return (
     <PageShell>
@@ -199,21 +219,60 @@ export default async function MarketBriefAdminPage() {
               FII / DII ACTIVITY
             </p>
 
-            <p className="mt-4 text-2xl font-black text-white">
-              Awaiting Data
-            </p>
+            {fiiDiiData ? (
+              <>
+                <p className="mt-2 text-xs text-emerald-400">
+                  Trade Date: {fiiDiiData.trade_date}
+                </p>
 
-            <p className="mt-2 text-sm text-slate-400">
-              FII Net Buy / Sell
-            </p>
+                <div className="mt-4">
+                  <p className="text-sm font-semibold text-white">
+                    FII Activity
+                  </p>
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-400">
+                    <p>Buy: {formatIndianNumber(fiiBuy)}</p>
+                    <p>Sell: {formatIndianNumber(fiiSell)}</p>
+                  </div>
+                  <p className={`mt-2 text-lg font-black ${getChangeColor(fiiNet)}`}>
+                    Net: {fiiNet > 0 ? "+" : ""}
+                    {formatIndianNumber(fiiNet)}
+                  </p>
+                </div>
 
-            <p className="mt-2 text-sm text-slate-400">
-              DII Net Buy / Sell
-            </p>
+                <div className="mt-4 border-t border-slate-700 pt-3">
+                  <p className="text-sm font-semibold text-white">
+                    DII Activity
+                  </p>
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-400">
+                    <p>Buy: {formatIndianNumber(diiBuy)}</p>
+                    <p>Sell: {formatIndianNumber(diiSell)}</p>
+                  </div>
+                  <p className={`mt-2 text-lg font-black ${getChangeColor(diiNet)}`}>
+                    Net: {diiNet > 0 ? "+" : ""}
+                    {formatIndianNumber(diiNet)}
+                  </p>
+                </div>
 
-            <p className="mt-4 text-xs font-semibold text-amber-400">
-              Data integration pending
-            </p>
+                <p className="mt-3 text-xs text-slate-500">
+                  Values in ₹ Crores
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="mt-4 text-2xl font-black text-white">
+                  Awaiting Data
+                </p>
+                <p className="mt-2 text-sm text-slate-400">
+                  FII Net Buy / Sell
+                </p>
+                <p className="mt-2 text-sm text-slate-400">
+                  DII Net Buy / Sell
+                </p>
+                <p className="mt-4 text-xs font-semibold text-amber-400">
+                  No FII/DII records found
+                </p>
+              </>
+            )}
           </div>
         </div>
 
