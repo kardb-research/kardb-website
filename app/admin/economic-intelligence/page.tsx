@@ -1,17 +1,15 @@
-
 import PageShell from "@/components/PageShell";
 import { requireAdmin } from "@/lib/supabase/admin";
 import EconomicDataImporter from "@/components/EconomicDataImporter";
 
 const categories = [
-  "GDP Growth",
   "Inflation",
+  "GDP Growth",
+  "Economic Growth",
   "Monetary Policy",
-  "GST",
   "Banking Credit & Deposit",
+  "External Sector",
   "Forex Reserves",
-  "Fiscal Deficit",
-  "Unemployment Rate",
 ];
 
 export default async function EconomicIntelligenceAdminPage() {
@@ -23,10 +21,6 @@ export default async function EconomicIntelligenceAdminPage() {
     .order("category")
     .order("indicator_name");
 
-  const { count: observationCount } = await supabase
-    .from("economic_indicator_observations")
-    .select("*", { count: "exact", head: true });
-
   const activeIndicators =
     indicators?.filter((item) => item.is_active).length ?? 0;
 
@@ -37,14 +31,12 @@ export default async function EconomicIntelligenceAdminPage() {
           <p className="text-sm font-semibold text-cyan-400">
             KARDB ECONOMIC INTELLIGENCE
           </p>
-
           <h1 className="mt-3 text-3xl font-black text-white">
-            Economic Intelligence Dashboard
+            Economic Data Management
           </h1>
-
           <p className="mt-2 text-slate-400">
-            Monitor India's macroeconomic indicators and manage historical
-            economic data.
+            Manage the latest official figures and the period-wise observations
+            used in the Economic Intelligence charts.
           </p>
         </div>
 
@@ -54,62 +46,42 @@ export default async function EconomicIntelligenceAdminPage() {
           </div>
         ) : (
           <>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
-                <p className="text-sm text-slate-400">
-                  Economic Categories
-                </p>
+                <p className="text-sm text-slate-400">Data Categories</p>
                 <p className="mt-3 text-3xl font-black text-white">
                   {categories.length}
                 </p>
               </div>
-
               <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
-                <p className="text-sm text-slate-400">
-                  Active Indicators
-                </p>
+                <p className="text-sm text-slate-400">Active Indicators</p>
                 <p className="mt-3 text-3xl font-black text-white">
                   {activeIndicators}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
-                <p className="text-sm text-slate-400">
-                  Historical Observations
-                </p>
-                <p className="mt-3 text-3xl font-black text-white">
-                  {observationCount ?? 0}
                 </p>
               </div>
             </div>
 
             <div className="mt-10">
               <h2 className="text-xl font-bold text-white">
-                Economic Categories
+                Approved Data Categories
               </h2>
-
               <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {categories.map((category) => {
                   const categoryIndicators =
                     indicators?.filter(
-                      (item) => item.category === category
+                      (item) => item.category === category && item.is_active
                     ) ?? [];
-
                   return (
                     <div
                       key={category}
                       className="rounded-xl border border-slate-700 bg-slate-900/60 p-5"
                     >
-                      <h3 className="font-bold text-white">
-                        {category}
-                      </h3>
-
+                      <h3 className="font-bold text-white">{category}</h3>
                       <p className="mt-3 text-2xl font-black text-cyan-400">
                         {categoryIndicators.length}
                       </p>
-
                       <p className="mt-1 text-xs text-slate-400">
-                        Registered Indicators
+                        Active Indicators
                       </p>
                     </div>
                   );
@@ -121,7 +93,6 @@ export default async function EconomicIntelligenceAdminPage() {
               <h2 className="text-xl font-bold text-white">
                 Registered Indicators
               </h2>
-
               <div className="mt-4 overflow-x-auto rounded-xl border border-slate-700">
                 <table className="w-full min-w-[750px] text-left text-sm">
                   <thead className="bg-slate-800 text-slate-300">
@@ -133,7 +104,6 @@ export default async function EconomicIntelligenceAdminPage() {
                       <th className="px-4 py-3">Status</th>
                     </tr>
                   </thead>
-
                   <tbody>
                     {(indicators ?? []).map((indicator) => (
                       <tr
@@ -148,28 +118,14 @@ export default async function EconomicIntelligenceAdminPage() {
                             {indicator.indicator_code}
                           </p>
                         </td>
-
-                        <td className="px-4 py-3">
-                          {indicator.category}
-                        </td>
-
-                        <td className="px-4 py-3">
-                          {indicator.unit}
-                        </td>
-
-                        <td className="px-4 py-3">
-                          {indicator.frequency}
-                        </td>
-
+                        <td className="px-4 py-3">{indicator.category}</td>
+                        <td className="px-4 py-3">{indicator.unit}</td>
+                        <td className="px-4 py-3">{indicator.frequency}</td>
                         <td className="px-4 py-3">
                           {indicator.is_active ? (
-                            <span className="text-emerald-400">
-                              Active
-                            </span>
+                            <span className="text-emerald-400">Active</span>
                           ) : (
-                            <span className="text-red-400">
-                              Inactive
-                            </span>
+                            <span className="text-red-400">Inactive</span>
                           )}
                         </td>
                       </tr>

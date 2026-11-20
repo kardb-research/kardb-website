@@ -1,4 +1,3 @@
-
 import { NextResponse } from "next/server";
 import { parse } from "csv-parse/sync";
 import { requireAdmin } from "@/lib/supabase/admin";
@@ -34,9 +33,7 @@ function errorResponse(message: string, status: number) {
 
 function validDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-
   const date = new Date(`${value}T00:00:00.000Z`);
-
   return (
     !Number.isNaN(date.getTime()) &&
     date.toISOString().slice(0, 10) === value
@@ -44,15 +41,19 @@ function validDate(value: string): boolean {
 }
 
 function numberValue(value: unknown): number | null {
-  if (typeof value !== "string" && typeof value !== "number") {
-    return null;
-  }
-
+  if (typeof value !== "string" && typeof value !== "number") return null;
   const cleaned = String(value).replace(/,/g, "").trim();
   if (!cleaned) return null;
-
   const result = Number(cleaned);
   return Number.isFinite(result) ? result : null;
+}
+
+function observationKey(
+  indicatorId: string,
+  periodStart: string,
+  periodEnd: string
+) {
+  return `${indicatorId}|${periodStart}|${periodEnd}`;
 }
 
 export async function POST(request: Request) {
@@ -60,7 +61,6 @@ export async function POST(request: Request) {
     const { supabase } = await requireAdmin();
 
     const origin = request.headers.get("origin");
-
     if (!origin || origin !== new URL(request.url).origin) {
       return errorResponse("Invalid request origin.", 403);
     }
@@ -85,7 +85,6 @@ export async function POST(request: Request) {
     }
 
     let rows: Record<string, string>[];
-
     try {
       rows = parse(await file.text(), {
         columns: true,
@@ -102,9 +101,7 @@ export async function POST(request: Request) {
       rows.length === 0 ||
       rows.length > MAX_RECORDS ||
       Object.keys(rows[0]).length !== EXPECTED_HEADERS.length ||
-      EXPECTED_HEADERS.some(
-        (header) => !Object.keys(rows[0]).includes(header)
-      )
+      EXPECTED_HEADERS.some((header) => !Object.keys(rows[0]).includes(header))
     ) {
       return errorResponse("CSV headers or record count are invalid.", 400);
     }
@@ -116,14 +113,11 @@ export async function POST(request: Request) {
       const indicatorCode = String(row.indicator_code || "")
         .trim()
         .toUpperCase();
-
       const periodStart = String(row.period_start || "").trim();
       const periodEnd = String(row.period_end || "").trim();
       const periodLabel = String(row.period_label || "").trim();
       const value = numberValue(row.value);
-      const publicationDate = String(
-        row.publication_date || ""
-      ).trim();
+      const publicationDate = String(row.publication_date || "").trim();
       const source = String(row.source || "").trim();
 
       if (
@@ -143,9 +137,7 @@ export async function POST(request: Request) {
         );
       }
 
-      const duplicateKey =
-        `${indicatorCode}|${periodStart}|${periodEnd}`;
-
+      const duplicateKey = `${indicatorCode}|${periodStart}|${periodEnd}`;
       if (seen.has(duplicateKey)) {
         return errorResponse(
           `Duplicate CSV record: ${indicatorCode}, ${periodLabel}`,
@@ -154,7 +146,6 @@ export async function POST(request: Request) {
       }
 
       seen.add(duplicateKey);
-
       parsedRecords.push({
         indicator_code: indicatorCode,
         period_start: periodStart,
@@ -199,7 +190,6 @@ export async function POST(request: Request) {
 
     const observations = parsedRecords.map((record) => {
       const indicator = indicatorMap.get(record.indicator_code)!;
-
       return {
         indicator_id: indicator.id,
         period_start: record.period_start,
@@ -208,22 +198,25 @@ export async function POST(request: Request) {
         value: record.value,
         publication_date: record.publication_date,
         source: record.source || indicator.source,
+        indicator_code: record.indicator_code,
+        indicator_name: indicator.indicator_name,
       };
     });
 
-    // EXISTING RECORD CHECK FOR BOTH VALIDATE AND IMPORT
+    // Find already-imported exact indicator + reporting-period combinations.
+    // Existing records are skipped, never updated or overwritten.
+    const indicatorIds = [
+      ...new Set(observations.map((record) => record.indicator_id)),
+    ];
+    const periodStarts = [
+      ...new Set(observations.map((record) => record.period_start)),
+    ];
 
     const { data: existing, error: existingError } = await supabase
       .from("economic_indicator_observations")
       .select("indicator_id, period_start, period_end")
-      .in(
-        "indicator_id",
-        observations.map((record) => record.indicator_id)
-      )
-      .in(
-        "period_start",
-        [...new Set(observations.map((record) => record.period_start))]
-      );
+      .in("indicator_id", indicatorIds)
+      .in("period_start", periodStarts);
 
     if (existingError) {
       console.error("Duplicate check failed:", existingError);
@@ -231,81 +224,111 @@ export async function POST(request: Request) {
     }
 
     const existingKeys = new Set(
-      (existing ?? []).map(
-        (record) =>
-          `${record.indicator_id}|${record.period_start}|${record.period_end}`
+      (existing ?? []).map((record) =>
+        observationKey(
+          record.indicator_id,
+          record.period_start,
+          record.period_end
+        )
       )
     );
 
-    const duplicate = observations.find((record) =>
+    const existingRecords = observations.filter((record) =>
       existingKeys.has(
-        `${record.indicator_id}|${record.period_start}|${record.period_end}`
+        observationKey(
+          record.indicator_id,
+          record.period_start,
+          record.period_end
+        )
       )
     );
 
-    if (duplicate) {
-      return errorResponse(
-        `Existing reporting period found: ${duplicate.period_start} to ${duplicate.period_end}. Nothing was imported.`,
-        409
-      );
-    }
+    const newRecords = observations.filter(
+      (record) =>
+        !existingKeys.has(
+          observationKey(
+            record.indicator_id,
+            record.period_start,
+            record.period_end
+          )
+        )
+    );
 
-    // VALIDATE ONLY: NO DATABASE INSERTION
+    const previewRecords = newRecords.map((record) => ({
+      indicator_code: record.indicator_code,
+      indicator_name: record.indicator_name,
+      period_start: record.period_start,
+      period_end: record.period_end,
+      period_label: record.period_label,
+      value: record.value,
+      publication_date: record.publication_date,
+      source: record.source,
+    }));
 
     if (action === "validate") {
       return NextResponse.json({
         success: true,
         action: "validate",
-        message: "CSV validated successfully. No data has been imported.",
-        valid_records: parsedRecords.length,
-        records: parsedRecords.map((record) => {
-          const indicator = indicatorMap.get(record.indicator_code)!;
-
-          return {
-            ...record,
-            indicator_name: indicator.indicator_name,
-            source: record.source || indicator.source,
-          };
-        }),
+        message:
+          newRecords.length > 0
+            ? "CSV validated. Existing observations will be skipped; only new observations are eligible for import."
+            : "CSV is valid, but all observations already exist. Nothing new needs importing.",
+        total_records: parsedRecords.length,
+        valid_records: newRecords.length,
+        skipped_existing_records: existingRecords.length,
+        records: previewRecords,
         source_file: file.name,
       });
     }
 
-    // IMPORT: INSERT ONLY, NEVER UPDATE OR OVERWRITE
+    if (newRecords.length === 0) {
+      return NextResponse.json({
+        success: true,
+        action: "import",
+        message: "No new observations. All CSV records already exist; nothing was changed.",
+        imported_records: 0,
+        skipped_existing_records: existingRecords.length,
+        records: [],
+        source_file: file.name,
+      });
+    }
+
+    // INSERT ONLY. Existing rows are never updated or overwritten.
+    const insertPayload = newRecords.map(
+      ({
+        indicator_code: _indicatorCode,
+        indicator_name: _indicatorName,
+        ...record
+      }) => record
+    );
 
     const { data, error } = await supabase
       .from("economic_indicator_observations")
-      .insert(observations)
-      .select(
-        "id, indicator_id, period_start, period_end, period_label, value"
-      );
+      .insert(insertPayload)
+      .select("id, indicator_id, period_start, period_end, period_label, value");
 
     if (error) {
       console.error("Economic data import failed:", error);
-
       if (error.code === "23505") {
         return errorResponse(
-          "Duplicate reporting period detected. Existing data was not overwritten.",
+          "A matching observation was inserted by another request during this import. No existing data was overwritten. Please validate the CSV again to refresh the skipped/new counts.",
           409
         );
       }
-
       return errorResponse("Database import failed.", 500);
     }
 
     return NextResponse.json({
       success: true,
       action: "import",
-      message: "Economic data imported successfully.",
+      message: "New economic observations imported. Existing observations were skipped and not changed.",
       imported_records: data?.length ?? 0,
+      skipped_existing_records: existingRecords.length,
       records: data,
       source_file: file.name,
     });
   } catch (error) {
     console.error("Economic import error:", error);
-    return errorResponse(
-      "Unable to process economic data CSV.",
-      500
-    );
+    return errorResponse("Unable to process economic data CSV.", 500);
   }
 }

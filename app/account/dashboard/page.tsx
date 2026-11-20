@@ -101,6 +101,7 @@ export default async function DashboardPage() {
             trialExpiresAt={access.trial_expires_at}
           />
         )}
+
       <section className="mx-auto w-full max-w-6xl px-6 py-16">
         <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8">
           <p className="text-sm text-cyan-400 font-semibold">
@@ -120,10 +121,12 @@ export default async function DashboardPage() {
               <h2 className="font-bold text-cyan-300">
                 Your KARDB Free Preview is Active
               </h2>
+
               <p className="mt-2 text-sm text-slate-300">
                 You have {access.trial_days_remaining} day(s) remaining
                 to explore Market Brief and Economic Intelligence.
               </p>
+
               {access.trial_expires_at && (
                 <p className="mt-2 text-xs text-slate-400">
                   Preview ends:{" "}
@@ -133,6 +136,7 @@ export default async function DashboardPage() {
                   })}
                 </p>
               )}
+
               <Link
                 href="/account/subscription"
                 className="mt-4 inline-block rounded-lg bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950"
@@ -142,7 +146,7 @@ export default async function DashboardPage() {
             </div>
           )}
 
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
             <DashboardCard
               title="Market Brief"
               description="Daily market updates, index movements and market breadth analysis."
@@ -150,10 +154,10 @@ export default async function DashboardPage() {
             />
 
             <DashboardCard
-              title="Economic Intelligence"
-              description="Weekly economic updates and monthly reviews."
-              locked={false}
-            />
+  title="Economic Intelligence"
+  description="Official economic figures and period-wise trend charts."
+  href="/account/dashboard/economic-intelligence"
+/>
 
             <DashboardCard
               title="Research Reports"
@@ -163,7 +167,7 @@ export default async function DashboardPage() {
             />
 
             <DashboardCard
-              title="Historical Data"
+              title="Historical Research Reports"
               description="Explore previous monthly research reports included in your subscription."
               locked={!isAdmin && !hasActiveSubscription}
               href="/account/dashboard/historical"
