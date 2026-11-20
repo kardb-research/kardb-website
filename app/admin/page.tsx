@@ -27,6 +27,11 @@ export default async function AdminDashboardPage() {
           </p>
 
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
+          <AdminCard
+          title="Free Sample Management"
+          description="Upload, preview and publish the free KARDB sample research report."
+  href="/admin/free-sample"
+/>
             <AdminCard
               title="Research Reports"
               description="Upload, manage and publish company research reports."
