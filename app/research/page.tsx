@@ -1,18 +1,19 @@
+
 import type { Metadata } from "next";
 import Link from "next/link";
-import SiteFooter from "../../components/SiteFooter";
+import PageShell from "@/components/PageShell";
 
 export const metadata: Metadata = {
-  title: "Equity Research Framework",
+  title: "Equity Research Framework | KARDB",
   description:
-    "Explore KARDB's structured equity research framework covering fundamental research, ratio analysis, peer comparison, industry analysis and technical analysis.",
+    "Explore the proposed KARDB equity research framework, covering fundamental analysis, financial ratios, peer comparison, industry analysis and market behaviour.",
   alternates: {
     canonical: "https://kardb.com/research",
   },
   openGraph: {
     title: "Equity Research Framework | KARDB",
     description:
-      "Explore KARDB's structured equity research framework covering fundamental research, ratio analysis, peer comparison, industry analysis and technical analysis.",
+      "Discover KARDB's proposed structured approach to company and financial analysis.",
     url: "https://kardb.com/research",
     siteName: "KARDB",
     type: "website",
@@ -21,45 +22,46 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Equity Research Framework | KARDB",
     description:
-      "Explore KARDB's structured equity research framework covering fundamental research, ratio analysis, peer comparison, industry analysis and technical analysis.",
+      "Explore the proposed KARDB equity research framework.",
   },
 };
+
 const researchModules = [
   {
     number: "01",
     title: "Fundamental Research",
     description:
-      "Analyse business performance, financial statements, profitability, growth and cash-flow quality.",
+      "Examine a company's business model, financial statements, revenue, profitability, cash flows, growth and financial position.",
   },
   {
     number: "02",
     title: "Ratio Analysis",
     description:
-      "Evaluate profitability, efficiency, leverage, liquidity and return-based financial indicators.",
+      "Study profitability, liquidity, leverage, efficiency and return-based indicators to understand financial performance.",
   },
   {
     number: "03",
     title: "Peer Comparison",
     description:
-      "Compare relevant companies using consistent financial and operating metrics.",
+      "Compare relevant companies using appropriate financial and operating parameters, while considering differences in business models.",
   },
   {
     number: "04",
     title: "Industry Analysis",
     description:
-      "Study industry structure, competitive dynamics, cycles and important external factors.",
+      "Examine industry structure, competitive conditions, business cycles and external factors that may influence company performance.",
   },
   {
     number: "05",
     title: "Technical Analysis",
     description:
-      "Study price structure, trend, momentum, support, resistance and market behaviour.",
+      "Study price trends, momentum, support and resistance, price structure and other market-behaviour indicators.",
   },
   {
     number: "06",
     title: "Research Output",
     description:
-      "Convert analysed data into structured reports, tables, charts and research insights.",
+      "Organise analytical findings into a structured research format with relevant explanations, tables, charts and disclosures.",
   },
 ];
 
@@ -67,336 +69,289 @@ const workflow = [
   {
     number: "01",
     title: "Data",
-    text: "Collect and organise relevant financial, operating and market data.",
+    text: "Identify and organise relevant company, financial, industry and market information.",
   },
   {
     number: "02",
     title: "Analysis",
-    text: "Analyse growth, profitability, cash flows, ratios and business performance.",
+    text: "Examine business performance, financial statements, ratios, growth and cash flows.",
   },
   {
     number: "03",
     title: "Comparison",
-    text: "Compare relevant metrics across periods, peers and industry context.",
+    text: "Evaluate relevant historical periods, peer companies and industry context.",
   },
   {
     number: "04",
     title: "Interpretation",
-    text: "Connect the numbers with business quality, industry dynamics and market structure.",
+    text: "Consider findings alongside assumptions, business conditions, uncertainties and potential risks.",
   },
   {
     number: "05",
     title: "Output",
-    text: "Present findings through structured reports, charts, tables and insights.",
+    text: "Organise the findings into a clear and structured research presentation.",
   },
 ];
 
 export default function ResearchPage() {
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <PageShell>
+      <main>
+        {/* Hero */}
+        <section className="border-b border-slate-800 bg-slate-950">
+          <div className="mx-auto max-w-6xl px-6 py-20 md:py-24">
+            <p className="text-sm font-bold tracking-[0.25em] text-cyan-400">
+              KARDB RESEARCH FRAMEWORK
+            </p>
 
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-6 py-5">
+            <h1 className="mt-5 max-w-4xl text-4xl font-black leading-tight md:text-6xl">
+              Structured research.
+              <span className="block text-cyan-400">
+                Clear analysis.
+              </span>
+            </h1>
 
-          {/* Logo */}
-          <Link
-            href="/"
-            className="shrink-0 text-2xl font-bold tracking-tight"
-          >
-            KARDB<span className="text-cyan-400">.</span>
-          </Link>
+            <p className="mt-7 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
+              A proposed framework for examining listed companies through
+              business fundamentals, financial information, ratios,
+              comparative analysis, industry context and market behaviour.
+            </p>
 
-          {/* Desktop Navigation */}
-          <div className="hidden items-center gap-6 text-sm text-slate-300 lg:flex">
+            <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-400">
+              The objective is to bring different dimensions of company
+              analysis together so that financial performance and business
+              conditions can be understood in a broader context.
+            </p>
 
-            <Link href="/" className="hover:text-white">
-              Home
-            </Link>
+            <div className="mt-9 flex flex-wrap gap-4">
+              <Link
+                href="/methodology"
+                className="rounded-lg bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
+              >
+                Explore Methodology
+              </Link>
 
-            <Link
-              href="/research"
-              className="text-white"
-            >
-              Research
-            </Link>
-
-            <Link href="/reports" className="hover:text-white">
-              Reports
-            </Link>
-
-            <Link href="/methodology" className="hover:text-white">
-              Methodology
-            </Link>
-
-            <Link href="/pricing" className="hover:text-white">
-              Pricing
-            </Link>
-
-            <Link href="/about" className="hover:text-white">
-              About
-            </Link>
-
-            <Link href="/faq" className="hover:text-white">
-              FAQ
-            </Link>
-
-            <Link href="/regulatory" className="hover:text-white">
-              Regulatory
-            </Link>
-
+              <Link
+                href="/reports"
+                className="rounded-lg border border-slate-700 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-400"
+              >
+                View Research Reports
+              </Link>
+            </div>
           </div>
+        </section>
 
-          {/* Account */}
-          <div className="flex items-center gap-3">
+        {/* Research Framework */}
+        <section
+          id="framework"
+          className="border-b border-slate-800 bg-slate-900/50"
+        >
+          <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
+            <div className="max-w-3xl">
+              <p className="text-xs font-bold tracking-[0.25em] text-cyan-400">
+                RESEARCH FRAMEWORK
+              </p>
 
-            <Link
-              href="/account/login"
-              className="hidden text-sm text-slate-300 hover:text-white sm:block"
-            >
-              Login
-            </Link>
+              <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+                Analyse the business through multiple layers.
+              </h2>
 
-            <Link
-              href="/account/register"
-              className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
-            >
-              Get Started
-            </Link>
+              <p className="mt-5 text-sm leading-7 text-slate-400 md:text-base">
+                The proposed KARDB framework is organised into six
+                analytical areas. The relevance and depth of each area
+                depend on the company, available information and research
+                objective.
+              </p>
+            </div>
 
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {researchModules.map((item) => (
+                <article
+                  key={item.number}
+                  className="rounded-2xl border border-slate-800 bg-slate-950/70 p-7 transition hover:border-cyan-400/50"
+                >
+                  <p className="text-xs font-bold tracking-widest text-cyan-400">
+                    {item.number}
+                  </p>
+
+                  <h3 className="mt-4 text-xl font-bold text-white">
+                    {item.title}
+                  </h3>
+
+                  <p className="mt-3 text-sm leading-7 text-slate-400">
+                    {item.description}
+                  </p>
+                </article>
+              ))}
+            </div>
           </div>
+        </section>
 
-        </div>
+        {/* Workflow */}
+        <section className="bg-slate-950">
+          <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
+            <div className="max-w-3xl">
+              <p className="text-xs font-bold tracking-[0.25em] text-cyan-400">
+                RESEARCH WORKFLOW
+              </p>
 
-        {/* Mobile Navigation */}
-        <div className="overflow-x-auto border-t border-white/10 lg:hidden">
-          <div className="mx-auto flex min-w-max gap-5 px-6 py-3 text-sm text-slate-300">
+              <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+                From information to structured research.
+              </h2>
 
-            <Link href="/" className="hover:text-cyan-400">
-              Home
-            </Link>
+              <p className="mt-5 text-sm leading-7 text-slate-400 md:text-base">
+                The proposed workflow follows five stages to organise
+                information, examine business performance and communicate
+                analytical findings.
+              </p>
+            </div>
 
-            <Link href="/research" className="text-cyan-400">
-              Research
-            </Link>
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+              {workflow.map((step) => (
+                <article
+                  key={step.number}
+                  className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full border border-cyan-400/50 text-sm font-bold text-cyan-400">
+                    {step.number}
+                  </div>
 
-            <Link href="/reports" className="hover:text-cyan-400">
-              Reports
-            </Link>
+                  <h3 className="mt-5 text-lg font-bold text-white">
+                    {step.title}
+                  </h3>
 
-            <Link href="/methodology" className="hover:text-cyan-400">
-              Methodology
-            </Link>
-
-            <Link href="/pricing" className="hover:text-cyan-400">
-              Pricing
-            </Link>
-
-            <Link href="/about" className="hover:text-cyan-400">
-              About
-            </Link>
-
-            <Link href="/faq" className="hover:text-cyan-400">
-              FAQ
-            </Link>
-
-            <Link href="/regulatory" className="hover:text-cyan-400">
-              Regulatory
-            </Link>
-
-          </div>
-        </div>
-      </nav>
-
-      {/* Header */}
-      <section className="mx-auto max-w-7xl px-6 pb-20 pt-24">
-        <div className="max-w-4xl">
-
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-400">
-            KARDB Research
-          </p>
-
-          <h1 className="mt-6 text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-            Structured research.
-            <br />
-            Clear analysis.
-          </h1>
-
-          <p className="mt-8 max-w-3xl text-lg leading-8 text-slate-400">
-            A structured framework for analysing listed companies through
-            financial data, ratios, peer comparison, industry context and
-            market behaviour.
-          </p>
-
-          <div className="mt-8 flex flex-wrap gap-4">
-
-            <Link
-              href="/reports"
-              className="rounded-full bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 hover:bg-cyan-300"
-            >
-              Explore Reports
-            </Link>
+                  <p className="mt-3 text-sm leading-7 text-slate-400">
+                    {step.text}
+                  </p>
+                </article>
+              ))}
+            </div>
 
             <Link
               href="/methodology"
-              className="rounded-full border border-slate-700 px-6 py-3 text-sm font-semibold text-white hover:border-slate-500"
+              className="mt-8 inline-block text-sm font-bold text-cyan-400 underline underline-offset-4 hover:text-cyan-300"
             >
-              View Methodology
+              Read the detailed methodology
             </Link>
-
           </div>
+        </section>
 
-        </div>
-      </section>
-
-      {/* Research Framework */}
-      <section
-        id="framework"
-        className="border-y border-white/10 bg-slate-900/50"
-      >
-        <div className="mx-auto max-w-7xl px-6 py-24">
-
-          <div className="max-w-3xl">
-
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-400">
-              Research Framework
-            </p>
-
-            <h2 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
-              Analyse the business through multiple layers.
-            </h2>
-
-            <p className="mt-6 text-lg leading-8 text-slate-400">
-              KARDB separates research into defined analytical layers so that
-              financial performance, business quality, industry structure and
-              market behaviour can be examined systematically.
-            </p>
-
-          </div>
-
-          <div className="mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-
-            {researchModules.map((item) => (
-              <div
-                key={item.number}
-                className="group rounded-2xl border border-white/10 bg-slate-950 p-7 transition duration-300 hover:-translate-y-1 hover:border-cyan-400/40"
-              >
-
-                <div className="text-sm font-semibold text-cyan-400">
-                  {item.number}
-                </div>
-
-                <h3 className="mt-5 text-xl font-semibold">
-                  {item.title}
-                </h3>
-
-                <p className="mt-4 leading-7 text-slate-400">
-                  {item.description}
-                </p>
-
-              </div>
-            ))}
-
-          </div>
-        </div>
-      </section>
-
-      {/* Research Workflow */}
-      <section className="mx-auto max-w-7xl px-6 py-24">
-
-        <div className="max-w-3xl">
-
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-400">
-            Research Workflow
-          </p>
-
-          <h2 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
-            From data to structured research.
-          </h2>
-
-          <p className="mt-6 text-lg leading-8 text-slate-400">
-            A consistent process helps transform raw financial and market
-            information into a structured research output.
-          </p>
-
-        </div>
-
-        <div className="mt-16 grid gap-6 md:grid-cols-5">
-
-          {workflow.map((step) => (
-            <div key={step.number}>
-
-              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-cyan-400/50 text-sm font-semibold text-cyan-400">
-                {step.number}
-              </div>
-
-              <h3 className="mt-6 text-xl font-semibold">
-                {step.title}
-              </h3>
-
-              <p className="mt-4 leading-7 text-slate-400">
-                {step.text}
+        {/* Research Philosophy */}
+        <section className="border-y border-slate-800 bg-slate-900/50">
+          <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 md:grid-cols-2 md:py-20">
+            <div>
+              <p className="text-xs font-bold tracking-[0.25em] text-cyan-400">
+                RESEARCH PHILOSOPHY
               </p>
 
+              <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+                Numbers first.
+                <span className="block text-cyan-400">
+                  Structure always.
+                </span>
+              </h2>
             </div>
-          ))}
 
-        </div>
-      </section>
+            <div className="space-y-5 text-sm leading-7 text-slate-400 md:text-base">
+              <p>
+                A company's performance cannot always be understood
+                through a single financial metric or isolated market
+                indicator.
+              </p>
 
-      {/* Research Philosophy */}
-      <section className="border-y border-white/10 bg-slate-900/50">
+              <p>
+                Business fundamentals, financial performance, relevant
+                peer information, industry conditions and market behaviour
+                provide different perspectives that may complement one
+                another.
+              </p>
 
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-24 md:grid-cols-2">
+              <p>
+                The KARDB framework aims to organise these perspectives
+                while keeping assumptions, uncertainties and research
+                limitations visible.
+              </p>
 
-          <div>
+              <Link
+                href="/methodology"
+                className="inline-block font-bold text-cyan-400 underline underline-offset-4 hover:text-cyan-300"
+              >
+                Understand our methodology
+              </Link>
+            </div>
+          </div>
+        </section>
 
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-400">
-              Research Philosophy
+        {/* Transparency */}
+        <section className="bg-slate-950">
+          <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
+            <p className="text-xs font-bold tracking-[0.25em] text-cyan-400">
+              RESEARCH TRANSPARENCY
             </p>
 
-            <h2 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
-              Numbers first.
-              <br />
-              Structure always.
+            <h2 className="mt-4 max-w-3xl text-3xl font-bold md:text-4xl">
+              Analysis must be understood in context.
             </h2>
 
-          </div>
+            <div className="mt-6 max-w-4xl space-y-5 text-sm leading-7 text-slate-400">
+              <p>
+                Financial information may involve estimation differences,
+                reporting limitations and changes in accounting or business
+                conditions. Historical performance does not guarantee
+                future results.
+              </p>
 
-          <div className="space-y-6 text-lg leading-8 text-slate-400">
+              <p>
+                Research conclusions should be considered alongside their
+                underlying information, assumptions, relevant risks and
+                limitations.
+              </p>
 
-            <p>
-              KARDB focuses on structured analysis rather than relying on a
-              single metric or isolated market signal.
-            </p>
-
-            <p>
-              Financial performance, ratios, peer data, industry context and
-              market behaviour are studied together to create a broader
-              research view.
-            </p>
-
-            <p>
-              The objective is to make the research process transparent,
-              repeatable and easy to understand.
-            </p>
+              <p>
+                The description of a proposed research framework does not
+                itself constitute a research recommendation or investment
+                advice.
+              </p>
+            </div>
 
             <Link
-              href="/reports"
-              className="inline-block text-cyan-400 hover:text-cyan-300"
+              href="/regulatory"
+              className="mt-7 inline-block text-sm font-bold text-cyan-400 underline underline-offset-4 hover:text-cyan-300"
             >
-              Explore Research Reports →
+              View regulatory disclosures
             </Link>
-
           </div>
+        </section>
 
-        </div>
+        {/* Development and registration status */}
+        <section className="border-t border-slate-800 bg-slate-900/60">
+          <div className="mx-auto max-w-6xl px-6 py-12 md:py-16">
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-7 md:p-9">
+              <p className="text-xs font-bold tracking-[0.2em] text-amber-400">
+                PLATFORM DEVELOPMENT STATUS
+              </p>
 
-      </section>
+              <h2 className="mt-4 text-2xl font-bold text-white">
+                KARDB is under development.
+              </h2>
 
-      <SiteFooter />
+              <p className="mt-4 max-w-4xl text-sm leading-7 text-slate-300">
+                KARDB has not been granted SEBI registration as a Research
+                Analyst as of 21 November 2026. The platform is under
+                development. KARDB is not currently offering paid research
+                subscriptions or regulated Research Analyst services.
+              </p>
 
-
-    </main>
+              <Link
+                href="/regulatory/sebi-registration"
+                className="mt-6 inline-block text-sm font-bold text-cyan-400 underline underline-offset-4 hover:text-cyan-300"
+              >
+                View registration status
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+    </PageShell>
   );
 }

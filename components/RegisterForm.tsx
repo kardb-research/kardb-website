@@ -9,6 +9,7 @@ export default function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,22 +18,49 @@ export default function RegisterForm() {
     event.preventDefault();
     setMessage("");
     setError("");
+
+    const cleanName = name.trim();
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanName) {
+      setError("Please enter your name.");
+      return;
+    }
+
+    if (!cleanEmail) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must contain at least 8 characters.");
+      return;
+    }
+
+    if (!acceptedTerms) {
+      setError("Please accept the Terms & Conditions to continue.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const supabase = createClient();
 
-      const { error } = await supabase.auth.signUp({
-        email,
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: cleanEmail,
         password,
         options: {
-          data: { full_name: name },
+          data: {
+            full_name: cleanName,
+            terms_accepted: true,
+          },
           emailRedirectTo: `${window.location.origin}/account/login`,
         },
       });
 
-      if (error) {
-        setError(error.message);
+      if (signUpError) {
+        setError(signUpError.message);
         return;
       }
 
@@ -43,6 +71,7 @@ export default function RegisterForm() {
       setName("");
       setEmail("");
       setPassword("");
+      setAcceptedTerms(false);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -54,40 +83,97 @@ export default function RegisterForm() {
     <section className="mx-auto max-w-md px-6 py-20">
       <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8">
         <h1 className="text-3xl font-black">Create your account</h1>
+
         <p className="mt-2 text-sm text-slate-400">
-          Start exploring KARDB research.
+          Create a KARDB account to access available platform features.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <label className="block text-sm text-slate-300">
             Name
-            <input required value={name}
+            <input
+              required
+              type="text"
+              autoComplete="name"
+              maxLength={100}
+              value={name}
               onChange={(e) => setName(e.target.value)}
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3"
-              placeholder="Your name" />
+              placeholder="Your name"
+            />
           </label>
 
           <label className="block text-sm text-slate-300">
             Email
-            <input required type="email" value={email}
+            <input
+              required
+              type="email"
+              autoComplete="email"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3"
-              placeholder="you@example.com" />
+              placeholder="you@example.com"
+            />
           </label>
 
           <label className="block text-sm text-slate-300">
             Password
-            <input required type="password" minLength={8} value={password}
+            <input
+              required
+              type="password"
+              autoComplete="new-password"
+              minLength={8}
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3"
-              placeholder="Minimum 8 characters" />
+              placeholder="Minimum 8 characters"
+            />
           </label>
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
-          {message && <p className="text-sm text-green-400">{message}</p>}
+          <label className="flex items-start gap-3 text-sm text-slate-400">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="mt-1 h-4 w-4 accent-cyan-400"
+              required
+            />
+            <span>
+              I have read and agree to KARDB's{" "}
+              <Link
+                href="/regulatory/terms"
+                className="text-cyan-400 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Terms & Conditions
+              </Link>
+              .
+            </span>
+          </label>
 
-          <button type="submit" disabled={loading}
-            className="w-full rounded-lg bg-cyan-400 px-4 py-3 font-bold text-slate-950 disabled:opacity-50">
+          <p className="text-xs leading-5 text-slate-500">
+            Creating an account does not provide a paid subscription or
+            access to regulated Research Analyst services.
+          </p>
+
+          {error && (
+            <p role="alert" className="text-sm text-red-400">
+              {error}
+            </p>
+          )}
+
+          {message && (
+            <p role="status" className="text-sm text-green-400">
+              {message}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !acceptedTerms}
+            className="w-full rounded-lg bg-cyan-400 px-4 py-3 font-bold text-slate-950 disabled:opacity-50"
+          >
             {loading ? "Creating account..." : "Create Account"}
           </button>
         </form>

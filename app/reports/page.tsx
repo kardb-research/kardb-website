@@ -1,17 +1,19 @@
+
 import type { Metadata } from "next";
+import Link from "next/link";
 import PageShell from "@/components/PageShell";
 
 export const metadata: Metadata = {
-  title: "Research Reports",
+  title: "Research Reports | KARDB",
   description:
-    "Explore KARDB's equity research reports, company analysis, sector research and technical analysis. Published reports will be listed with their research date and access level.",
+    "Explore KARDB's educational sample research material, proposed company research framework and report transparency approach.",
   alternates: {
     canonical: "https://kardb.com/reports",
   },
   openGraph: {
     title: "Research Reports | KARDB",
     description:
-      "Explore KARDB's equity research reports, company analysis, sector research and technical analysis. Published reports will be listed with their research date and access level.",
+      "Explore KARDB's educational sample research material and research framework.",
     url: "https://kardb.com/reports",
     siteName: "KARDB",
     type: "website",
@@ -20,38 +22,211 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Research Reports | KARDB",
     description:
-      "Explore KARDB's equity research reports, company analysis, sector research and technical analysis. Published reports will be listed with their research date and access level.",
+      "Explore KARDB's educational sample research material and research framework.",
   },
 };
-const reports = [
-  ["Sample Research Report", "Company Research", "Coming soon"],
-  ["Sample Sector Report", "Industry Research", "Coming soon"],
-  ["Sample Technical Research", "Technical Analysis", "Coming soon"],
-];
 
 export default function ReportsPage() {
   return (
     <PageShell>
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        <p className="text-sm font-semibold tracking-[0.25em] text-cyan-400">RESEARCH REPORTS</p>
-        <h1 className="mt-4 text-4xl font-black md:text-6xl">Research, organised.</h1>
-        <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-400">
-          Published reports will appear here with research date, category and access level.
-        </p>
+      <main>
+        {/* Hero */}
+        <section className="border-b border-slate-800 bg-slate-950">
+          <div className="mx-auto max-w-6xl px-6 py-20 md:py-24">
+            <p className="text-sm font-bold tracking-[0.25em] text-cyan-400">
+              KARDB RESEARCH LIBRARY
+            </p>
 
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {reports.map(([title, type, status]) => (
-            <article key={title} className="rounded-2xl border border-slate-800 bg-slate-900/50 p-7">
-              <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">{type}</span>
-              <h2 className="mt-4 text-xl font-bold">{title}</h2>
-              <p className="mt-3 text-sm text-slate-500">{status}</p>
-              <button disabled className="mt-7 w-full rounded-lg border border-slate-700 px-4 py-3 text-sm text-slate-500">
-                Report unavailable
-              </button>
-            </article>
-          ))}
-        </div>
-      </section>
+            <h1 className="mt-5 max-w-4xl text-4xl font-black leading-tight md:text-6xl">
+              Research, organised.
+              <span className="block text-cyan-400">
+                Information with context.
+              </span>
+            </h1>
+
+            <p className="mt-7 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
+              This section introduces the KARDB research presentation
+              approach and provides access to the available educational
+              demonstration material.
+            </p>
+
+            <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-400">
+              Reports and research material should be read with their
+              publication dates, underlying information, assumptions,
+              limitations and relevant disclosures.
+            </p>
+
+            <div className="mt-9 flex flex-wrap gap-4">
+              <Link
+                href="/account/dashboard/research"
+                className="rounded-lg bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
+              >
+                Access Sample Report
+              </Link>
+
+              <Link
+                href="/methodology"
+                className="rounded-lg border border-slate-700 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-400"
+              >
+                View Methodology
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Educational Sample */}
+        <section className="border-b border-slate-800 bg-slate-900/50">
+          <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
+            <p className="text-xs font-bold tracking-[0.25em] text-cyan-400">
+              EDUCATIONAL DEMONSTRATION
+            </p>
+
+            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+              Explore the sample research report.
+            </h2>
+
+            <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-400 md:text-base">
+              KARDB provides a fictional educational sample to demonstrate
+              the proposed research presentation and analytical structure.
+              It is intended for educational demonstration, not as a live
+              research recommendation or investment advice.
+            </p>
+
+            <div className="mt-10 max-w-3xl rounded-2xl border border-cyan-400/30 bg-slate-950/70 p-7 md:p-9">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs font-bold tracking-widest text-cyan-400">
+                  SAMPLE MATERIAL
+                </span>
+
+                <span className="rounded-full border border-cyan-400/30 px-3 py-1 text-xs font-semibold text-cyan-300">
+                  Educational
+                </span>
+              </div>
+
+              <h3 className="mt-5 text-2xl font-bold text-white">
+                Educational Sample Research Report
+              </h3>
+
+              <p className="mt-4 text-sm leading-7 text-slate-400">
+                Review the sample report through your KARDB account
+                dashboard. Sign-in is required to access the published
+                sample material.
+              </p>
+
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link
+                  href="/account/dashboard/research"
+                  className="rounded-lg bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
+                >
+                  View Sample in Dashboard
+                </Link>
+
+                <Link
+                  href="/account/register"
+                  className="rounded-lg border border-slate-700 px-5 py-3 text-sm font-semibold text-white transition hover:border-cyan-400"
+                >
+                  Create an Account
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Paid Research Status */}
+        <section className="bg-slate-950">
+          <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
+            <p className="text-xs font-bold tracking-[0.25em] text-cyan-400">
+              RESEARCH SERVICE AVAILABILITY
+            </p>
+
+            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+              Subscription research services.
+            </h2>
+
+            <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-400 md:text-base">
+              Paid research subscriptions and regulated Research Analyst
+              services are not currently being offered by KARDB.
+              Information about future service availability will be
+              communicated through the platform when applicable.
+            </p>
+
+            <div className="mt-9 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-7 md:p-9">
+              <p className="text-xs font-bold tracking-[0.2em] text-amber-400">
+                REGULATORY STATUS
+              </p>
+
+              <h3 className="mt-4 text-2xl font-bold text-white">
+                Platform under development
+              </h3>
+
+              <p className="mt-4 max-w-4xl text-sm leading-7 text-slate-300">
+                KARDB has not been granted SEBI registration as a Research
+                Analyst as of 21 November 2026. The platform is under
+                development. KARDB is not currently offering paid research
+                subscriptions or regulated Research Analyst services.
+              </p>
+
+              <Link
+                href="/regulatory/sebi-registration"
+                className="mt-6 inline-block text-sm font-bold text-cyan-400 underline underline-offset-4 hover:text-cyan-300"
+              >
+                View registration status
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Report Transparency */}
+        <section className="border-t border-slate-800 bg-slate-900/50">
+          <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
+            <p className="text-xs font-bold tracking-[0.25em] text-cyan-400">
+              REPORT TRANSPARENCY
+            </p>
+
+            <h2 className="mt-4 max-w-3xl text-3xl font-bold md:text-4xl">
+              Understanding a report beyond its conclusion.
+            </h2>
+
+            <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-400 md:text-base">
+              A research report should be understood in the context of
+              the information and assumptions supporting its analysis.
+              Relevant dates, limitations, risks and disclosures matter
+              when interpreting research findings.
+            </p>
+
+            <div className="mt-9 grid gap-5 md:grid-cols-2">
+              <article className="rounded-2xl border border-slate-800 bg-slate-950/70 p-7">
+                <h3 className="text-lg font-bold text-white">
+                  Research information
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-slate-400">
+                  The relevant company information, financial periods,
+                  data references and research dates help establish
+                  the context of an analysis.
+                </p>
+              </article>
+
+              <article className="rounded-2xl border border-slate-800 bg-slate-950/70 p-7">
+                <h3 className="text-lg font-bold text-white">
+                  Assumptions and limitations
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-slate-400">
+                  Estimates, assumptions, uncertainties and potential
+                  risks should be considered alongside analytical
+                  conclusions.
+                </p>
+              </article>
+            </div>
+
+            <Link
+              href="/regulatory/disclaimers"
+              className="mt-8 inline-block text-sm font-bold text-cyan-400 underline underline-offset-4 hover:text-cyan-300"
+            >
+              Read research disclaimers
+            </Link>
+          </div>
+        </section>
+      </main>
     </PageShell>
   );
 }
