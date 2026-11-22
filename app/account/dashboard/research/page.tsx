@@ -23,13 +23,6 @@ export default async function ResearchPage() {
 
   const isAdmin = profile?.role === "admin";
 
-  // Free sample is available to every authenticated user.
-  const { data: samples, error: sampleError } = await supabase
-    .from("kardb_free_samples")
-    .select("id, title, description, published_at")
-    .eq("status", "published")
-    .order("published_at", { ascending: false });
-
   // Get current month in Indian Standard Time.
   const dateParts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kolkata",
@@ -72,73 +65,8 @@ export default async function ResearchPage() {
         </h1>
 
         <p className="mt-3 text-slate-400">
-          Explore the free sample report and access eligible monthly
-          research reports through your subscription.
+          Access eligible monthly research reports according to your subscription entitlement.
         </p>
-
-        {/* FREE SAMPLE SECTION */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-white">
-            Free Sample Research Report
-          </h2>
-
-          <p className="mt-2 text-sm text-slate-400">
-            Available to all registered and logged-in KARDB users.
-          </p>
-
-          {sampleError ? (
-            <div className="mt-5 rounded-xl border border-red-500/40 p-6">
-              <p className="text-red-400">
-                Unable to load the free sample. Please try again later.
-              </p>
-            </div>
-          ) : samples && samples.length > 0 ? (
-            <div className="mt-6 grid gap-5 md:grid-cols-2">
-              {samples.map((sample) => (
-                <div
-                  key={sample.id}
-                  className="rounded-xl border border-cyan-500/30 bg-slate-900/60 p-6"
-                >
-                  <p className="text-xs font-bold tracking-wider text-cyan-400">
-                    FREE SAMPLE
-                  </p>
-
-                  <h3 className="mt-3 text-xl font-bold text-white">
-                    {sample.title}
-                  </h3>
-
-                  {sample.description && (
-                    <p className="mt-3 text-sm text-slate-400">
-                      {sample.description}
-                    </p>
-                  )}
-
-                  <p className="mt-4 text-xs text-slate-500">
-                    Published:{" "}
-                    {sample.published_at
-                      ? new Date(sample.published_at).toLocaleDateString("en-IN")
-                      : "Date unavailable"}
-                  </p>
-
-                  <a
-                    href={`/api/account/free-sample?sample_id=${sample.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-6 inline-flex items-center rounded-lg bg-cyan-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-                  >
-                    View Free Sample PDF
-                  </a>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-5 rounded-xl border border-slate-700 bg-slate-900/50 p-6">
-              <p className="text-slate-400">
-                The free sample report will be available here soon.
-              </p>
-            </div>
-          )}
-        </div>
 
         {/* SUBSCRIPTION REPORTS SECTION */}
         <div className="mt-16">

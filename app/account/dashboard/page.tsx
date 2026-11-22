@@ -45,6 +45,27 @@ export default async function DashboardPage() {
     redirect("/account/subscription");
   }
 
+  // Show the educational sample only to a user in the free preview
+  // who does not have an active subscription. Existing subscribers
+  // and administrators never receive this promotion.
+  let freeSample: {
+    id: string;
+    title: string;
+    description: string | null;
+  } | null = null;
+
+  if (!isAdmin && !hasActiveSubscription && isTrialActive) {
+    const { data: sample } = await supabase
+      .from("kardb_free_samples")
+      .select("id, title, description")
+      .eq("status", "published")
+      .order("published_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    freeSample = sample;
+  }
+
   let plan: { name: string; report_limit: number } | null = null;
   let subscriptionExpiresAt: string | null = null;
 
@@ -117,32 +138,58 @@ export default async function DashboardPage() {
           </p>
 
           {isTrialActive && !hasActiveSubscription && (
-            <div className="mt-6 rounded-xl border border-cyan-500/40 bg-cyan-500/10 p-5">
-              <h2 className="font-bold text-cyan-300">
-                Your KARDB Free Preview is Active
-              </h2>
+            <div className="mt-6 flex flex-col gap-5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 p-5 md:flex-row md:items-center md:justify-between">
+              <div className="min-w-0 flex-1">
+                <h2 className="font-bold text-cyan-300">
+                  Your KARDB Free Preview is Active
+                </h2>
 
-              <p className="mt-2 text-sm text-slate-300">
-                You have {access.trial_days_remaining} day(s) remaining
-                to explore Market Brief and Economic Intelligence.
-              </p>
-
-              {access.trial_expires_at && (
-                <p className="mt-2 text-xs text-slate-400">
-                  Preview ends:{" "}
-                  {new Date(access.trial_expires_at).toLocaleString("en-IN", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
+                <p className="mt-2 text-sm text-slate-300">
+                  You have {access.trial_days_remaining} day(s) remaining
+                  to explore Market Brief and Economic Intelligence.
                 </p>
-              )}
 
-              <Link
-                href="/account/subscription"
-                className="mt-4 inline-block rounded-lg bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950"
-              >
-                View Subscription Plans
-              </Link>
+                {access.trial_expires_at && (
+                  <p className="mt-2 text-xs text-slate-400">
+                    Preview ends:{" "}
+                    {new Date(access.trial_expires_at).toLocaleString("en-IN", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                )}
+
+                <Link
+                  href="/account/subscription"
+                  className="mt-4 inline-block rounded-lg bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950"
+                >
+                  View Subscription Plans
+                </Link>
+              </div>
+
+              {freeSample && (
+                <div className="w-full rounded-xl border border-cyan-400/30 bg-slate-950/60 p-4 md:max-w-xs">
+                  <p className="text-xs font-bold tracking-wider text-cyan-400">
+                    YOUR SAMPLE REPORT
+                  </p>
+                  <h3 className="mt-2 font-bold text-white">
+                    {freeSample.title}
+                  </h3>
+                  {freeSample.description && (
+                    <p className="mt-2 line-clamp-2 text-xs text-slate-400">
+                      {freeSample.description}
+                    </p>
+                  )}
+                  <a
+                    href={`/api/account/free-sample?sample_id=${freeSample.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex items-center rounded-lg bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
+                  >
+                    View Sample Report
+                  </a>
+                </div>
+              )}
             </div>
           )}
 

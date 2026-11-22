@@ -6,14 +6,14 @@ import PageShell from "@/components/PageShell";
 export const metadata: Metadata = {
   title: "Research Reports | KARDB",
   description:
-    "Explore KARDB's educational sample research material, proposed company research framework and report transparency approach.",
+    "Explore KARDB's proposed company research framework and report transparency approach.",
   alternates: {
     canonical: "https://kardb.com/reports",
   },
   openGraph: {
     title: "Research Reports | KARDB",
     description:
-      "Explore KARDB's educational sample research material and research framework.",
+      "Explore KARDB's research framework and report transparency approach.",
     url: "https://kardb.com/reports",
     siteName: "KARDB",
     type: "website",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Research Reports | KARDB",
     description:
-      "Explore KARDB's educational sample research material and research framework.",
+      "Explore KARDB's research framework and report transparency approach.",
   },
 };
 
@@ -46,8 +46,7 @@ export default function ReportsPage() {
 
             <p className="mt-7 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
               This section introduces the KARDB research presentation
-              approach and provides access to the available educational
-              demonstration material.
+              approach, report structure and transparency principles.
             </p>
 
             <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-400">
@@ -56,78 +55,13 @@ export default function ReportsPage() {
               limitations and relevant disclosures.
             </p>
 
-            <div className="mt-9 flex flex-wrap gap-4">
-              <Link
-                href="/account/dashboard/research"
-                className="rounded-lg bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
-              >
-                Access Sample Report
-              </Link>
-
+            <div className="mt-9">
               <Link
                 href="/methodology"
-                className="rounded-lg border border-slate-700 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-400"
+                className="inline-block rounded-lg border border-slate-700 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-400"
               >
                 View Methodology
               </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Educational Sample */}
-        <section className="border-b border-slate-800 bg-slate-900/50">
-          <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
-            <p className="text-xs font-bold tracking-[0.25em] text-cyan-400">
-              EDUCATIONAL DEMONSTRATION
-            </p>
-
-            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-              Explore the sample research report.
-            </h2>
-
-            <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-400 md:text-base">
-              KARDB provides a fictional educational sample to demonstrate
-              the proposed research presentation and analytical structure.
-              It is intended for educational demonstration, not as a live
-              research recommendation or investment advice.
-            </p>
-
-            <div className="mt-10 max-w-3xl rounded-2xl border border-cyan-400/30 bg-slate-950/70 p-7 md:p-9">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="text-xs font-bold tracking-widest text-cyan-400">
-                  SAMPLE MATERIAL
-                </span>
-
-                <span className="rounded-full border border-cyan-400/30 px-3 py-1 text-xs font-semibold text-cyan-300">
-                  Educational
-                </span>
-              </div>
-
-              <h3 className="mt-5 text-2xl font-bold text-white">
-                Educational Sample Research Report
-              </h3>
-
-              <p className="mt-4 text-sm leading-7 text-slate-400">
-                Review the sample report through your KARDB account
-                dashboard. Sign-in is required to access the published
-                sample material.
-              </p>
-
-              <div className="mt-7 flex flex-wrap gap-3">
-                <Link
-                  href="/account/dashboard/research"
-                  className="rounded-lg bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
-                >
-                  View Sample in Dashboard
-                </Link>
-
-                <Link
-                  href="/account/register"
-                  className="rounded-lg border border-slate-700 px-5 py-3 text-sm font-semibold text-white transition hover:border-cyan-400"
-                >
-                  Create an Account
-                </Link>
-              </div>
             </div>
           </div>
         </section>
