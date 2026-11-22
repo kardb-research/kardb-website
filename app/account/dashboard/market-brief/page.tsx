@@ -8,6 +8,15 @@ const indices = [
   { name: "SENSEX", symbol: "SENSEX" },
   { name: "BANK NIFTY", symbol: "BANKNIFTY" },
 ];
+const sectorIndices = [
+  { name: "NIFTY IT", symbol: "NIFTYIT" },
+  { name: "NIFTY METAL", symbol: "NIFTYMETAL" },
+  { name: "NIFTY AUTO", symbol: "NIFTYAUTO" },
+  { name: "NIFTY REALTY", symbol: "NIFTYREALTY" },
+  { name: "NIFTY PHARMA", symbol: "NIFTYPHARMA" },
+  { name: "NIFTY MIDCAP 100", symbol: "NIFTYMIDCAP100" },
+  { name: "NIFTY SMALLCAP 100", symbol: "NIFTYSMALLCAP100" },
+];
 
 function formatNumber(value: number, decimals = 2) {
   return value.toLocaleString("en-IN", {
@@ -127,7 +136,10 @@ export default async function SubscriberMarketBriefPage() {
     supabase
       .from("market_eod_indices")
       .select("trade_date, index_symbol, open, high, low, close, previous_close")
-      .in("index_symbol", ["NIFTY", "SENSEX", "BANKNIFTY"])
+      .in(
+        "index_symbol",
+        [...indices, ...sectorIndices].map((item) => item.symbol)
+      )
       .order("trade_date", { ascending: false }),
 
     supabase
@@ -139,7 +151,7 @@ export default async function SubscriberMarketBriefPage() {
 
     supabase
       .from("market_eod_stocks")
-      .select("close, previous_close")
+      .select("trade_date, close, previous_close")
       .order("trade_date", { ascending: false })
       .limit(500),
 
@@ -269,40 +281,61 @@ export default async function SubscriberMarketBriefPage() {
               </div>
             )}
           </div>
-        </div>
 
-        <div className="mt-10">
-          <h2 className="mb-5 text-xl font-bold text-white">
-            Market Intelligence Indicators
-          </h2>
+          {/* Sector Data - all seven indices visible, no click required */}
+          <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-5">
+            <h2 className="text-sm font-semibold text-slate-400">
+              SECTOR DATA
+            </h2>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-5">
-              <h3 className="font-semibold text-white">Sector Data</h3>
-              <p className="mt-2 text-sm text-slate-400">
-                Sector performance
-              </p>
-              <p className="mt-4 text-xs font-semibold text-slate-500">
-                Coming Soon
-              </p>
+            <div className="mt-4 space-y-3">
+              {sectorIndices.map((item) => {
+                const data = latestIndexData[item.symbol];
+                const close = data ? Number(data.close) : null;
+                const previous = data ? Number(data.previous_close) : null;
+                const change =
+                  close !== null && previous !== null
+                    ? close - previous
+                    : null;
+                const percentage =
+                  previous !== null && previous > 0 && change !== null
+                    ? (change / previous) * 100
+                    : null;
+
+                return (
+                  <div
+                    key={item.symbol}
+                    className="flex items-center justify-between gap-3 border-b border-slate-800 pb-2 last:border-0 last:pb-0"
+                  >
+                    <span className="text-xs font-medium text-slate-300">
+                      {item.name}
+                    </span>
+
+                    {close !== null && change !== null && percentage !== null ? (
+                      <span className="whitespace-nowrap text-right text-xs font-semibold text-white">
+{formatNumber(close)}{" "}
+<span className={changeColor(change)}>
+  {change > 0 ? "+" : ""}
+  {formatNumber(change)} (
+  {percentage > 0 ? "+" : ""}
+  {percentage.toFixed(2)}%)
+</span>
+</span>
+) : (
+  <span className="text-xs text-slate-500">
+    Data unavailable
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-
-            <a
-              href="#market-breadth"
-              className="rounded-xl border border-cyan-500/40 bg-cyan-500/5 p-5 transition hover:border-cyan-400 hover:bg-cyan-500/10"
-            >
-              <h3 className="font-semibold text-white">
-                NIFTY 500 Market Breadth
-              </h3>
-              <p className="mt-2 text-sm text-slate-400">
-                Advance and decline analysis
-              </p>
-              <p className="mt-4 text-xs font-semibold text-cyan-400">
-                View Analysis ↓
-              </p>
-            </a>
+            <p className="mt-4 border-t border-slate-800 pt-3 text-xs text-slate-500">
+              Trade Date: {latestIndexData["NIFTYIT"]?.trade_date ?? "—"}
+            </p>
           </div>
         </div>
+
 
         <div
           id="market-breadth"
@@ -367,6 +400,9 @@ export default async function SubscriberMarketBriefPage() {
 
           <p className="mt-4 text-xs text-slate-500">
             Based on available imported EOD stock records.
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Trade Date: {breadth?.[0]?.trade_date ?? "—"}
           </p>
         </div>
       </section>
