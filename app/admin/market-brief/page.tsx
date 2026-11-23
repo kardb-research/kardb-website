@@ -28,7 +28,7 @@ export default async function MarketBriefAdminPage() {
   const { data: indexRows } = await supabase
     .from("market_eod_indices")
     .select("trade_date, index_symbol, open, high, low, close, previous_close")
-    .in("index_symbol", ["NIFTY", "SENSEX", "BANKNIFTY"])
+    .in("index_symbol", indexCards.map((item) => item.symbol))
     .order("trade_date", { ascending: false });
 
   const { data: vixData } = await supabase

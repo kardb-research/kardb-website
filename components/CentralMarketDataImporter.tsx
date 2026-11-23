@@ -570,8 +570,24 @@ const [vixLoading, setVixLoading] = useState(false);
         </h3>
 
         <p className="mt-2 text-sm text-slate-400">
-          Upload NIFTY, SENSEX and BANK NIFTY index data through CSV.
+          Upload daily EOD data for all 10 indices: NIFTY 50, SENSEX, BANK NIFTY,
+          NIFTY MIDCAP 100, NIFTY SMALLCAP 100, NIFTY IT, NIFTY METAL,
+          NIFTY AUTO, NIFTY REALTY and NIFTY PHARMA.
         </p>
+
+        <div className="mt-4 rounded-lg border border-slate-700 bg-slate-950/60 p-4">
+          <p className="text-sm font-semibold text-slate-300">
+            Required CSV columns
+          </p>
+          <code className="mt-2 block break-all text-xs text-violet-300">
+            trade_date,index_symbol,open,high,low,close,previous_close
+          </code>
+          <p className="mt-2 text-xs text-slate-400">
+            Use one row per index per trading date. Maximum 10 records per file.
+            Use the approved internal index symbols and provide previous_close
+            for accurate daily change calculations. Maximum file size: 2 MB.
+          </p>
+        </div>
 
         <input
           id="central-index-csv"

@@ -12,6 +12,13 @@ const ALLOWED_INDICES = new Set([
   "NIFTY",
   "SENSEX",
   "BANKNIFTY",
+  "NIFTYMIDCAP100",
+  "NIFTYSMALLCAP100",
+  "NIFTYIT",
+  "NIFTYMETAL",
+  "NIFTYAUTO",
+  "NIFTYREALTY",
+  "NIFTYPHARMA",
 ]);
 
 function errorResponse(message: string, status: number) {
