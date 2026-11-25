@@ -55,6 +55,12 @@ export default async function AdminDashboardPage() {
               description="Manage economic indicators, data imports and economic updates."
               href="/admin/economic-intelligence"
             />
+
+            <AdminCard
+              title="Feedback Management"
+              description="Review user feedback, manage feature requests and track submission status."
+              href="/admin/feedback"
+            />
           </div>
         </div>
       </section>

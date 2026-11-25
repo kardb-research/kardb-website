@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import PageShell from "@/components/PageShell";
 import TrialReminder from "@/components/TrialReminder";
+import FeedbackHub from "@/components/FeedbackHub";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -220,6 +221,8 @@ export default async function DashboardPage() {
               href="/account/dashboard/historical"
             />
           </div>
+
+          <FeedbackHub />
 
           <div className="mt-8 rounded-xl border border-slate-700 p-5">
             <h2 className="text-lg font-bold">Account Information</h2>

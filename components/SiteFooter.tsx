@@ -38,6 +38,8 @@ export default function SiteFooter() {
             <Link className="block hover:text-cyan-400" href="/faq">FAQ</Link>
             <Link className="block hover:text-cyan-400" href="/account/login">Login</Link>
             <Link className="block hover:text-cyan-400" href="/account/register">Register</Link>
+            <Link className="block hover:text-cyan-400" href="/account/dashboard#share-feedback">Share Feedback</Link>
+            <Link className="block hover:text-cyan-400" href="/account/dashboard#suggest-a-feature">Suggest a Feature</Link>
           </div>
         </div>
         
