@@ -6,88 +6,54 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const EMAIL_STORAGE_KEY = "kardb_admin_local_emails";
-
-const DEFAULT_EMAILS = [
-  "deepsmrit@gmail.com",
-  "adhyapanofstockmarket@gmail.com",
-  "kaavyaaaliya@gmail.com",
-  "shyams1953@gmail.com",
-  "deepakbhandari10@rediffmail.com",
-];
-
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
-  const [savedEmails, setSavedEmails] = useState<string[]>([]);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function loadLocalEmails() {
-    if (window.location.hostname !== "localhost") return;
-
-    try {
-      const stored = localStorage.getItem(EMAIL_STORAGE_KEY);
-      const parsed: string[] = stored ? JSON.parse(stored) : [];
-
-      const emails = Array.from(
-        new Set([...DEFAULT_EMAILS, ...parsed])
-      );
-
-      setSavedEmails(emails);
-      localStorage.setItem(EMAIL_STORAGE_KEY, JSON.stringify(emails));
-    } catch {
-      setSavedEmails(DEFAULT_EMAILS);
-    }
-  }
-
-  function saveLocalEmail(value: string) {
-    if (window.location.hostname !== "localhost") return;
-
-    try {
-      const stored = localStorage.getItem(EMAIL_STORAGE_KEY);
-      const parsed: string[] = stored ? JSON.parse(stored) : [];
-
-      const emails = Array.from(
-        new Set([...DEFAULT_EMAILS, ...parsed, value.trim().toLowerCase()])
-      );
-
-      localStorage.setItem(EMAIL_STORAGE_KEY, JSON.stringify(emails));
-      setSavedEmails(emails);
-    } catch {
-      // Login should continue if local storage is unavailable.
-    }
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanEmail || !password) {
+      setError("Please enter your email and password.");
+      return;
+    }
+
     setLoading(true);
 
-    try {
-      const supabase = createClient();
+    const supabase = createClient();
 
+    try {
       const { data: authData, error: authError } =
         await supabase.auth.signInWithPassword({
-          email: email.trim(),
+          email: cleanEmail,
           password,
         });
 
       if (authError || !authData.user) {
-        setError(authError?.message || "Unable to sign in.");
+        setError(
+          "Unable to sign in. Please check your credentials and try again."
+        );
         return;
       }
-
-      saveLocalEmail(email);
 
       const { data, error: accessError } = await supabase.rpc(
         "get_trial_access"
       );
 
-      if (accessError || !data || data.length === 0) {
+      if (
+        accessError ||
+        !Array.isArray(data) ||
+        data.length === 0
+      ) {
+        await supabase.auth.signOut();
         setError(
           "We could not verify your account access. Please try again later."
         );
@@ -96,31 +62,28 @@ export default function LoginForm() {
 
       const access = data[0];
 
-      // Administrator access.
       if (access.is_admin === true) {
         router.replace("/admin");
         router.refresh();
         return;
       }
 
-      // Active paid subscribers.
       if (access.has_active_subscription === true) {
         router.replace("/account/dashboard");
         router.refresh();
         return;
       }
 
-      // Users with an active 7-day trial.
       if (access.is_trial_active === true) {
         router.replace("/account/dashboard");
         router.refresh();
         return;
       }
 
-      // Expired trial or account without trial access.
       router.replace("/account/subscription");
       router.refresh();
     } catch {
+      await supabase.auth.signOut();
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -158,20 +121,12 @@ export default function LoginForm() {
             <input
               required
               type="email"
-              list="kardb-saved-emails"
               autoComplete="email"
-              onFocus={loadLocalEmails}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-cyan-400"
               placeholder="you@example.com"
             />
-
-            <datalist id="kardb-saved-emails">
-              {savedEmails.map((savedEmail) => (
-                <option key={savedEmail} value={savedEmail} />
-              ))}
-            </datalist>
           </label>
 
           <label className="block text-sm text-slate-300">
@@ -187,8 +142,19 @@ export default function LoginForm() {
             />
           </label>
 
+          <div className="text-right">
+            <Link
+              href="/account/forgot-password"
+              className="text-sm text-cyan-400 hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+
           {error && (
-            <p className="text-sm text-red-400">{error}</p>
+            <p role="alert" className="text-sm text-red-400">
+              {error}
+            </p>
           )}
 
           <button

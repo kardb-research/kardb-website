@@ -20,7 +20,7 @@ export default async function DashboardPage() {
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("full_name, email, role")
+    .select("full_name, email, role, is_preview_unlimited")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -102,16 +102,23 @@ export default async function DashboardPage() {
     user.email ||
     "KARDB User";
 
-  const subscriptionStatus = isAdmin
-    ? "Administrator"
-    : hasActiveSubscription
-      ? plan?.name || "Active Subscription"
-      : "7-Day Free Trial";
+const isPreviewUnlimited =
+  profile.is_preview_unlimited === true;
 
-  const subscriptionDetail = isAdmin
-    ? "Administrator access"
-    : hasActiveSubscription
-      ? `${plan?.report_limit ?? 0} monthly research reports`
+const subscriptionStatus = isAdmin
+  ? "Administrator"
+  : hasActiveSubscription
+    ? plan?.name || "Active Subscription"
+    : isPreviewUnlimited
+      ? "Unlimited Preview"
+      : "30-Day Free Preview";
+
+const subscriptionDetail = isAdmin
+  ? "Administrator access"
+  : hasActiveSubscription
+    ? `${plan?.report_limit ?? 0} monthly research reports`
+    : isPreviewUnlimited
+      ? "Unlimited preview access"
       : `${access.trial_days_remaining} day(s) remaining in your free preview`;
 
   return (
@@ -142,12 +149,15 @@ export default async function DashboardPage() {
             <div className="mt-6 flex flex-col gap-5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 p-5 md:flex-row md:items-center md:justify-between">
               <div className="min-w-0 flex-1">
                 <h2 className="font-bold text-cyan-300">
-                  Your KARDB Free Preview is Active
+                  {isPreviewUnlimited
+  ? "Your KARDB Unlimited Preview is Active"
+  : "Your KARDB 30-Day Free Preview is Active"}
                 </h2>
 
                 <p className="mt-2 text-sm text-slate-300">
-                  You have {access.trial_days_remaining} day(s) remaining
-                  to explore Market Brief and Economic Intelligence.
+{isPreviewUnlimited
+  ? "You have unlimited preview access to explore KARDB."
+  : `You have ${access.trial_days_remaining} day(s) remaining to explore Market Brief and Economic Intelligence.`}
                 </p>
 
                 {access.trial_expires_at && (

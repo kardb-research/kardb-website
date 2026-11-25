@@ -9,52 +9,57 @@ export default function TrialReminder({
   trialExpiresAt: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [trialDay, setTrialDay] = useState(0);
+  const [daysLeft, setDaysLeft] = useState(0);
 
   useEffect(() => {
     const expiryTime = new Date(trialExpiresAt).getTime();
-    const trialStartTime = expiryTime - 7 * 24 * 60 * 60 * 1000;
-    const elapsedDays = Math.floor(
-      (Date.now() - trialStartTime) / (24 * 60 * 60 * 1000)
-    ) + 1;
+    const now = Date.now();
 
-    if (elapsedDays < 4 || elapsedDays > 7) return;
+    if (!Number.isFinite(expiryTime) || expiryTime <= now) return;
 
-    const reminderKey = `kardb-trial-reminder-${trialExpiresAt}-${elapsedDays}`;
+    const remainingMs = expiryTime - now;
+    const remainingDays = Math.ceil(
+      remainingMs / (24 * 60 * 60 * 1000)
+    );
+
+    // Show reminders only during the final 7 days.
+    if (remainingDays > 7 || remainingDays < 1) return;
+
+    const reminderKey = `kardb-trial-reminder-${trialExpiresAt}-${remainingDays}`;
 
     if (localStorage.getItem(reminderKey)) return;
 
-    setTrialDay(elapsedDays);
+    setDaysLeft(remainingDays);
     setIsOpen(true);
   }, [trialExpiresAt]);
 
   function closeReminder() {
-    const reminderKey = `kardb-trial-reminder-${trialExpiresAt}-${trialDay}`;
+    const reminderKey = `kardb-trial-reminder-${trialExpiresAt}-${daysLeft}`;
     localStorage.setItem(reminderKey, "shown");
     setIsOpen(false);
   }
 
   if (!isOpen) return null;
 
-  const isFinalDay = trialDay === 7;
+  const isFinalDay = daysLeft === 1;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4">
       <div className="w-full max-w-md rounded-2xl border border-cyan-500/40 bg-slate-900 p-7 shadow-2xl">
         <p className="text-sm font-bold text-cyan-400">
-          KARDB FREE PREVIEW
+          KARDB 30-DAY FREE PREVIEW
         </p>
 
         <h2 className="mt-3 text-2xl font-black text-white">
           {isFinalDay
             ? "Your Free Preview Ends Today!"
-            : `Your Free Preview Has ${7 - trialDay} Day(s) Left`}
+            : `Your Free Preview Has ${daysLeft} Day(s) Left`}
         </h2>
 
         <p className="mt-3 text-sm leading-6 text-slate-300">
           {isFinalDay
-            ? "Today is the final day of your KARDB free preview. Explore the available platform features before your access expires."
-            : "Continue exploring Market Brief and Economic Intelligence during your KARDB free preview."}
+            ? "Today is the final day of your KARDB free preview. Your preview access will expire at the displayed expiry time."
+            : "Your KARDB free preview is nearing its end. Continue exploring Market Brief and Economic Intelligence, or review the available subscription plans."}
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
